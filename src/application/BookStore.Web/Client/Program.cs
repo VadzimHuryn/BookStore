@@ -7,9 +7,8 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
-namespace BookStore
+namespace BookStore.Web.Client
 {
     public class Program
     {
@@ -18,17 +17,9 @@ namespace BookStore
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("app");
 
-            var http = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
-
-            builder.Services.AddTransient(sp => http);
-
-            using var response = await http.GetAsync("appsettings.json");
-            using var stream = await response.Content.ReadAsStreamAsync();
-
-            builder.Configuration.AddJsonStream(stream);
+            builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
             await builder.Build().RunAsync();
         }
-
     }
 }

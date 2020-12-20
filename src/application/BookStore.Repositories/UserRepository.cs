@@ -32,6 +32,12 @@ namespace BookStore.Repositories
             return result;
         }
 
+        public List<UserRoleDto> GetUserRoles()
+        {
+            var result = Query<UserRoleDto>($@"SELECT * FROM [dbo].[UserRole]");
+            return result;
+        }
+
         public UserDto GetByUserId(string userId)
         {
             var result = First<UserDto>($@"SELECT * FROM [dbo].[User] WHERE [UserId] = {userId}");
@@ -42,7 +48,7 @@ namespace BookStore.Repositories
         {
             try
             {
-                Execute($@"INSERT INTO [dbo].[User](@UserId, @Password, @UserRoleId, @FirstName, @LastName, @PhoneNumber, @Email, @LastLoginDateTime, @IsDisabled)", user);
+                Execute($@"INSERT INTO [dbo].[User](UserId, Password, UserRoleId, FirstName, LastName, PhoneNumber, Email, LastLoginDateTime, IsDisabled) VALUES (@UserId, @Password, @UserRoleId, @FirstName, @LastName, @PhoneNumber, @Email, @LastLoginDateTime, @IsDisabled)", user);
                 return true;
             }
             catch(Exception e)

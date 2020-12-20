@@ -181,3 +181,26 @@ app {
         display: block;
     }
 }
+
+.modal-bg{
+    background-color: black;
+    opacity: 0.5;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top:0;
+    left:0;
+    z-index: 2;
+}
+.modal-window {
+    width: 500px;
+    padding: 20px;
+    margin: 0 auto;
+    top: 20px;
+    left: calc(50vw - 250px);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    background: white;
+    position: fixed;
+    z-index: 3;
+}

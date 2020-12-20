@@ -20,11 +20,21 @@ namespace BookStore.Repositories
 
         public List<T> Query<T>(string sql)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            try
             {
-                var result = connection.Query<T>(sql).ToList();
-                return result;
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    var result = connection.Query<T>(sql).ToList();
+                    connection.Close();
+                    return result;
+                }
             }
+            catch(Exception e)
+            {
+                return null;
+            }
+            
         }
 
         public T First<T>(string sql)
@@ -36,11 +46,11 @@ namespace BookStore.Repositories
             }
         }
 
-        public void Execute<T>(string sql, T model)
+        public int Execute<T>(string sql, T model)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
-                connection.Execute(sql, model);
+                return connection.Execute(sql, model);
             }
         }
     }

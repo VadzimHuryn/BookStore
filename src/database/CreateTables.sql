@@ -2,6 +2,7 @@ CREATE TABLE [Book]
 (
 	[Id] INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
 	[Name] NVARCHAR(256) NOT NULL,
+	[Description] NVARCHAR(MAX) NOT NULL,
 	[ReleaseDate] DATETIME,
 	[IsDisabled] BIT NOT NULL DEFAULT (0)
 )
@@ -76,6 +77,7 @@ CREATE TABLE [User]
 	[FirstName] NVARCHAR(256) NOT NULL,
 	[LastName] NVARCHAR(256) NOT NULL,
 	[PhoneNumber] NVARCHAR(256) NOT NULL,
+	[Password] NVARCHAR(MAX) NOT NULL,
 	[Email] NVARCHAR(256) NOT NULL,
 	[LastLoginDateTime] DATETIME NULL,
 	[IsDisabled] BIT NOT NULL DEFAULT (0)
@@ -134,9 +136,11 @@ GO
 
 ALTER TABLE [User]
 ADD CONSTRAINT [FK_User_UserRoleId_UserRole_Id] FOREIGN KEY ([UserRoleId]) REFERENCES [UserRole]([Id])
+GO
 
-
-
-
+INSERT INTO [UserRole] ([Code], [Name], [Comment])
+VALUES ('Administrator', 'Administrator', 'Administrator'),
+	   ('Seller', 'Seller', 'Seller'),
+	   ('Buyer', 'Buyer', 'Buyer')
 
 

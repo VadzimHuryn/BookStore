@@ -1,0 +1,139 @@
+﻿
+@page "/Users"
+@inject HttpClient Http
+
+<h3>Users</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">User Id</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Phone Number</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in users)
+        {
+            <tr>
+                <td scope="row">@user.UserId</td>
+                <td scope="row">@user.FirstName</td>
+                <td scope="row">@user.LastName</td>
+                <td scope="row">@user.Email</td>
+                <td scope="row">@user.PhoneNumber</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button @onclick="OpenAddWindow" class="btn btn-primary">Add</button>
+<BookStore.Web.Client.Components.ModalWindow Show="@OpenAddModal">
+    <EditForm Model="user" OnValidSubmit="@Submit">
+        <DataAnnotationsValidator />
+        @*<ValidationSummary />*@
+
+
+        <div class="form-group">
+            <label>User Id</label>
+            <InputText class="form-control" @bind-Value="user.UserId" @onfocusout="CheckUserId" />
+            <span hidden="@(!UserWithUserIdExists)" class="validation-message">User with UserId @user?.UserId alredy exists</span>
+            <ValidationMessage hidden="@UserWithUserIdExists" For="() => user.UserId" />
+        </div>
+
+        <div class="form-group">
+            <label>User Role</label>
+            <select class="form-control" @bind="user.UserRoleId">
+                <option value="-1" selected></option>
+                @foreach (var userRole in userRoles)
+                {
+                    <option value="@userRole.Id">@userRole.Name</option>
+                }
+            </select>
+            <ValidationMessage For="() => user.UserRoleId" />
+        </div>
+
+        <div class="form-group">
+            <label>First Name</label>
+            <InputText class="form-control" @bind-Value="user.FirstName" />
+            <ValidationMessage For="() => user.FirstName" />
+        </div>
+        <div class="form-group">
+            <label>Last Name</label>
+            <InputText class="form-control" @bind-Value="user.LastName" />
+            <ValidationMessage For="() => user.LastName" />
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <InputText class="form-control" @bind-Value="user.Email" />
+            <ValidationMessage For="() => user.Email" />
+        </div>
+        <div class="form-group">
+            <label>Phone number</label>
+            <InputText class="form-control" @bind-Value="user.PhoneNumber" />
+            <ValidationMessage For="() => user.PhoneNumber" />
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <BookStore.Web.Client.Components.PasswordField @bind-Password="user.Password" />
+            <ValidationMessage For="() => user.Password" />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </EditForm>
+
+</BookStore.Web.Client.Components.ModalWindow>
+
+@code
+{
+    private User user = new User();
+
+    private List<User> users = new List<User>();
+    private List<UserRole> userRoles = new List<UserRole>();
+
+    private bool OpenAddModal { get; set; }
+
+    private bool UserWithUserIdExists;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    protected void OpenAddWindow()
+    {
+        Console.WriteLine("this.OpenAddModal=" + this.OpenAddModal);
+        this.OpenAddModal = true;
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await Http.GetFromJsonAsync<List<User>>("User");
+        userRoles = await Http.GetFromJsonAsync<List<UserRole>>("User/Roles");
+    }
+
+    private async Task AddUser()
+    {
+        await Http.PostAsJsonAsync("User", user);
+    }
+
+    protected void CheckUserId()
+    {
+        if (!string.IsNullOrEmpty(user?.UserId))
+        {
+            UserWithUserIdExists = users.Any(x => x.UserId.Trim().ToUpperInvariant() == user.UserId.Trim().ToUpperInvariant());
+        }
+    }
+
+    protected async Task Submit()
+    {
+        CheckUserId();
+        if (UserWithUserIdExists)
+        {
+            return;
+        }
+        await AddUser();
+        await LoadUsers();
+        this.OpenAddModal = false;
+    }
+}
