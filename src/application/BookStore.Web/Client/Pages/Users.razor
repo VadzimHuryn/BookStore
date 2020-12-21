@@ -45,7 +45,7 @@
         <div class="form-group">
             <label>User Role</label>
             <select class="form-control" @bind="user.UserRoleId">
-                <option value="-1" selected></option>
+                <option value="-1" selected>-- select user role --</option>
                 @foreach (var userRole in userRoles)
                 {
                     <option value="@userRole.Id">@userRole.Name</option>
@@ -111,6 +111,7 @@
         users = await Http.GetFromJsonAsync<List<User>>("User");
         userRoles = await Http.GetFromJsonAsync<List<UserRole>>("User/Roles");
     }
+
 
     private async Task AddUser()
     {

@@ -33,7 +33,8 @@ namespace BookStore.Models.ViewModels
         [MaxLength(256)]
         public string Password { get; set; }
 
-        []
+        [Required]
+        [Range(1, 3, ErrorMessage = "Please choose a user role")]
         public int UserRoleId { get; set; }
     }
 }

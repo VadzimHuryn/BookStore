@@ -56,7 +56,7 @@ namespace BookStore.Services
             return result;
         }
 
-        public bool Add(User user)
+        public int Add(User user)
         {
             var dto = new UserDto()
             {

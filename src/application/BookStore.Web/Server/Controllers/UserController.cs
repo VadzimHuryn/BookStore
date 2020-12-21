@@ -32,7 +32,7 @@ namespace BookStore.Web.Server.Controllers
         }
 
         [HttpPost]
-        public bool Add([FromBody] User user)
+        public int Add([FromBody] User user)
         {
             var result = _userService.Add(user);
             return result;

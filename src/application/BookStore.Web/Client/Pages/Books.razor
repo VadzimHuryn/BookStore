@@ -4,31 +4,188 @@
 
 <h3>Books</h3>
 
-<table class="table">
+<table class="table table-hover">
     <thead>
         <tr>
             <th scope="col">Name</th>
             <th scope="col">ReleaseDate</th>
+            <th scope="col">Price</th>
+            <th scope="col">Count</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var book in books)
         {
-            <tr>
+            <tr class="clickable-row" @onclick="() => ShowAndLoadDescriptionWindow(book.Id)">
                 <td scope="row">@book.Name</td>
                 <td scope="row">@book.ReleaseDate.ToString("dd-MM-yyyy")</td>
+                <td scope="row">@book.Price</td>
+                <td scope="row">@book.Count</td>
             </tr>
         }
     </tbody>
-   
 </table>
+
+<button @onclick="ShowAddBookWindow" class="btn btn-primary">Add new book</button>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowDescriptionModal">
+    <p class="font-weight-bold">Name</p>
+    <p class="text-justify font-weight-normal">@book.Name</p>
+    <p class="font-weight-bold">Description</p>
+    <p class="text-justify font-weight-normal">@book.Description</p>
+    <p class="font-weight-bold">Release date</p>
+    <p class="text-justify font-weight-normal">@book.ReleaseDate</p>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteWindow">Delete</button>
+        <button type="button" class="btn btn-outline-secondary">Update</button>
+    </div>
+</BookStore.Web.Client.Components.ModalWindow>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowDeleteModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Delete book</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDeleteWindow">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                The book will be deleted from catalog.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="HideDeleteWindow">Cancel</button>
+                <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBook(book.Id)">Delete</button>
+            </div>
+        </div>
+    </div>
+</BookStore.Web.Client.Components.ModalWindow>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowAddModal">
+    <EditForm Model="book" OnValidSubmit="@AddSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <label>Name</label>
+            <InputText class="form-control" @bind-Value="book.Name" />
+            <ValidationMessage For="() => book.Name" />
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <InputTextArea class="form-control" @bind-Value="book.Description" />
+            <ValidationMessage For="() => book.Description" />
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <InputDate class="form-control" @bind-Value="ReleaseDate" />
+            <ValidationMessage For="() => book.ReleaseDate" />
+        </div>
+        <div class="form-group">
+            <label>Count</label>
+            <InputNumber class="form-control" @bind-Value="book.Count" />
+            <ValidationMessage For="() => book.Count" />
+        </div>
+        <div class="form-group">
+            <label>Price</label>
+            <InputNumber class="form-control" @bind-Value="book.Price" />
+            <ValidationMessage For="() => book.Price" />
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Add</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="HideAddWindow">Cancel</button>
+        </div>
+    </EditForm>
+</BookStore.Web.Client.Components.ModalWindow>
 
 @code
 {
+    private Book book = new Book();
     private List<Book> books = new List<Book>();
+    private DateTime ReleaseDate
+    {
+        get
+        {
+            book.ReleaseDate = DateTime.Now;
+            return book.ReleaseDate;
+        }
+        set => book.ReleaseDate = value;
+    }
+    private bool IsShowAddModal { get; set; }
+    private bool IsShowDeleteModal { get; set; }
+    private bool IsShowDescriptionModal { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadBooks();
+    }
+
+    protected void ShowAddBookWindow()
+    {
+        book = new Book();
+        this.IsShowAddModal = true;
+        HideDeleteWindow();
+        HideDescriptionWindow();
+    }
+
+    protected void HideAddWindow()
+    {
+        this.IsShowAddModal = false;
+    }
+
+    protected void ShowDeleteWindow()
+    {
+        this.IsShowDeleteModal = true;
+    }
+
+    protected void HideDeleteWindow()
+    {
+        this.IsShowDeleteModal = false;
+    }
+
+    protected async Task ShowAndLoadDescriptionWindow(int id)
+    {
+        HideDeleteWindow();
+        HideAddWindow();
+        await LoadBookById(id);
+        this.IsShowDescriptionModal = true;
+    }
+
+    private void HideDescriptionWindow()
+    {
+        this.IsShowDescriptionModal = false;
+    }
+
+    private async Task LoadBooks()
+    {
         books = await Http.GetFromJsonAsync<List<Book>>("Book");
+    }
+
+    private async Task LoadBookById(int id)
+    {
+        book = await Http.GetFromJsonAsync<Book>($"Book/{id}");
+    }
+
+    private async Task AddBook()
+    {
+        await Http.PostAsJsonAsync("Book", book);
+    }
+
+    private async Task DeleteBook(int id)
+    {
+        await Http.DeleteAsync($"Book/{id}");
+        await LoadBooks();
+        HideDeleteWindow();
+        HideDescriptionWindow();
+    }
+
+    protected async Task AddSubmit()
+    {
+        await AddBook();
+        await LoadBooks();
+        HideAddWindow();
+        HideDeleteWindow();
+        HideDescriptionWindow();
     }
 }

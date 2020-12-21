@@ -22,5 +22,25 @@ namespace BookStore.Web.Server.Controllers
         {
             return _bookService.GetAll();
         }
+
+        [HttpGet]
+        [Route("{id}")]
+        public Book GetById(int id)
+        {
+            return _bookService.GetById(id);
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public bool Delete(int id)
+        {
+            return _bookService.Delete(id);
+        }
+
+        [HttpPost]
+        public bool Add([FromBody] Book book)
+        {
+            return _bookService.Add(book);
+        }
     }
 }

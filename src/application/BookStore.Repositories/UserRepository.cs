@@ -8,22 +8,14 @@ using System.Threading.Tasks;
 
 namespace BookStore.Repositories
 {
-    public class UserRepository: BaseRepository
+    public class UserRepository : BaseRepository
     {
         public UserRepository(string connectionString) : base(connectionString) { }
 
         public List<UserDto> GetAll()
         {
-            try
-            {
-                var result = Query<UserDto>($@"SELECT * FROM [dbo].[User]").ToList();
-                return result;
-            }
-            catch(Exception e)
-            {
-                return null;
-            }
-            
+            var result = Query<UserDto>($@"SELECT * FROM [dbo].[User]").ToList();
+            return result;
         }
 
         public List<UserDto> GetAllAvailable()
@@ -44,32 +36,18 @@ namespace BookStore.Repositories
             return result;
         }
 
-        public bool Add(UserDto user)
+        public int Add(UserDto user)
         {
-            try
-            {
-                Execute($@"INSERT INTO [dbo].[User](UserId, Password, UserRoleId, FirstName, LastName, PhoneNumber, Email, LastLoginDateTime, IsDisabled) VALUES (@UserId, @Password, @UserRoleId, @FirstName, @LastName, @PhoneNumber, @Email, @LastLoginDateTime, @IsDisabled)", user);
-                return true;
-            }
-            catch(Exception e)
-            {
-                return false;
-            }
+            var result = QuerySingle($@"INSERT INTO [dbo].[User](UserId, Password, UserRoleId, FirstName, LastName, PhoneNumber, Email, LastLoginDateTime, IsDisabled) OUTPUT INSERTED.Id VALUES (@UserId, @Password, @UserRoleId, @FirstName, @LastName, @PhoneNumber, @Email, @LastLoginDateTime, @IsDisabled)", user);
+            return result;
         }
 
         public bool Update(UserDto user)
         {
-            try
-            {
-                Execute($@"UPDATE [dbo].[User]
-                           SET [FirstName] = @FirstName, [LastName] = @LastName, [PhoneNumber] = @PhoneNumber, [Email] = @Email
-                           WHERE [UserId] = @UserId", user);
-                return true;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
+            Execute($@"UPDATE [dbo].[User]
+                       SET [FirstName] = @FirstName, [LastName] = @LastName, [PhoneNumber] = @PhoneNumber, [Email] = @Email
+                       WHERE [UserId] = @UserId", user);
+            return true;
         }
     }
 }

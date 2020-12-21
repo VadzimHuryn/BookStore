@@ -34,7 +34,22 @@ namespace BookStore.Repositories
             {
                 return null;
             }
-            
+        }
+
+        public int QuerySingle<T>(string sql, T model)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    var result = connection.QuerySingle<int>(sql, model);
+                    return result;
+                }
+            }
+            catch (Exception e)
+            {
+                return 0;
+            }
         }
 
         public T First<T>(string sql)
