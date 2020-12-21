@@ -48,7 +48,7 @@ namespace BookStore.Repositories
 
         public BookOutputDto Update(BookDto book)
         {
-            Execute($@"UPDATE [dbo].[Book] SET [Name] = @Name, [Description] = @Description, [ReleaseDate] = @Date WHERE [Id] = @Id", book);
+            Execute($@"UPDATE [dbo].[Book] SET [Name] = @Name, [Description] = @Description, [ReleaseDate] = @ReleaseDate WHERE [Id] = @Id", book);
             var result = GetById(book.Id);
             return result;
         }

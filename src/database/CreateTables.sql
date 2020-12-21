@@ -44,19 +44,37 @@ CREATE TABLE [Good]
 	[Id] INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
 	[BookId] INT NOT NULL,
 	[Count] INT NOT NULL DEFAULT(0),
-	[Price] DECIMAL NOT NULL DEFAULT(0)
+	[Price] DECIMAL(16, 2) NOT NULL DEFAULT(0)
 )
 GO
 
-CREATE TABLE [Sold]
+CREATE TABLE [Order]
 (
 	[Id] INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+	[Comment] NVARCHAR(MAX),
+	[BuyerId] INT NULL,
+	[SellerId] INT NULL,
+	[OrderDateTime] DATETIME NOT NULL DEFAULT(GETDATE()),
+	[SummaryPrice] DECIMAL(16,2) NOT NULL,
+	[OrderStatusId] INT NOT NULL,
+)
+GO
+
+CREATE TABLE [OrderBook]
+(
+	[Id] INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+	[OrderId] INT NOT NULL,
 	[BookId] INT NOT NULL,
-	[Count] INT NOT NULL,
-	[SummaryPrice] INT NOT NULL,
-	[SoldDate] DATETIME NOT NULL DEFAULT GETDATE(),
-	[SellerId] INT NOT NULL,
-	[BuyerId] INT,
+	[Count] INT NOT NULL
+)
+GO
+
+CREATE TABLE [OrderStatus]
+(
+	[Id] INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+	[Code] NVARCHAR(256) NOT NULL,
+	[Name] NVARCHAR(256) NOT NULL,
+	[Comment] NVARCHAR(256) NOT NULL
 )
 GO
 
@@ -118,18 +136,28 @@ ALTER TABLE [Good]
 ADD CONSTRAINT [FK_Good_BookId_Book_Id] FOREIGN KEY ([BookId]) REFERENCES [Book]([Id])
 GO
 
---SOLD
+--ORDER
 
-ALTER TABLE [Sold]
-ADD CONSTRAINT [FK_Sold_BookId_Book_Id] FOREIGN KEY ([BookId]) REFERENCES [Book]([Id])
+ALTER TABLE [Order]
+ADD CONSTRAINT [FK_Order_SellerId_User_Id] FOREIGN KEY ([SellerId]) REFERENCES [User]([Id])
 GO
 
-ALTER TABLE [Sold]
-ADD CONSTRAINT [FK_Sold_SellerId_User_Id] FOREIGN KEY ([SellerId]) REFERENCES [User]([Id])
+ALTER TABLE [Order]
+ADD CONSTRAINT [FK_Order_BuyerId_User_Id] FOREIGN KEY ([BuyerId]) REFERENCES [User]([Id])
 GO
 
-ALTER TABLE [Sold]
-ADD CONSTRAINT [FK_Sold_BuyerId_User_Id] FOREIGN KEY ([BuyerId]) REFERENCES [User]([Id])
+ALTER TABLE [Order]
+ADD CONSTRAINT [FK_Order_OrderStatusId_OrderStatus_Id] FOREIGN KEY ([OrderStatusId]) REFERENCES [OrderStatus]([Id])
+GO
+
+--ORDER BOOK
+
+ALTER TABLE [OrderBook]
+ADD CONSTRAINT [FK_OrderBook_OrderId_Order_Id] FOREIGN KEY ([OrderId]) REFERENCES [Order]([Id])
+GO
+
+ALTER TABLE [OrderBook]
+ADD CONSTRAINT [FK_OrderBook_BookId_Book_Id] FOREIGN KEY ([BookId]) REFERENCES [Book]([Id])
 GO
 
 -- USER
@@ -143,4 +171,10 @@ VALUES ('Administrator', 'Administrator', 'Administrator'),
 	   ('Seller', 'Seller', 'Seller'),
 	   ('Buyer', 'Buyer', 'Buyer')
 
+INSERT INTO [OrderStatus] ([Code], [Name], [Comment])
+VALUES ('New', 'New', 'New'),
+	   ('Processed', 'Processed', 'Processed'),
+	   ('Paid', 'Paid', 'Paid'),
+	   ('Cancelled', 'Cancelled', 'Cancelled'),
+	   ('Delivered', 'Delivered', 'Delivered')
 

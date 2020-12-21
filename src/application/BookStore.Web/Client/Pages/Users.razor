@@ -28,7 +28,12 @@
     </tbody>
 </table>
 
-<button @onclick="OpenAddWindow" class="btn btn-primary">Add</button>
+<button @onclick="OpenAddWindow" class="btn btn-outline-secondary">Add user</button>
+
+<BookStore.Web.Client.Components.LoadWindow Show="IsShowLoadWindow">
+
+</BookStore.Web.Client.Components.LoadWindow>
+
 <BookStore.Web.Client.Components.ModalWindow Show="@OpenAddModal">
     <EditForm Model="user" OnValidSubmit="@Submit">
         <DataAnnotationsValidator />
@@ -95,6 +100,8 @@
 
     private bool UserWithUserIdExists;
 
+    private bool IsShowLoadWindow { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         await LoadUsers();
@@ -108,8 +115,10 @@
 
     private async Task LoadUsers()
     {
+        this.IsShowLoadWindow = true;
         users = await Http.GetFromJsonAsync<List<User>>("User");
         userRoles = await Http.GetFromJsonAsync<List<UserRole>>("User/Roles");
+        this.IsShowLoadWindow = false;
     }
 
 

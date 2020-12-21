@@ -42,5 +42,11 @@ namespace BookStore.Web.Server.Controllers
         {
             return _bookService.Add(book);
         }
+
+        [HttpPut]
+        public Book Update([FromBody] Book book)
+        {
+            return _bookService.Update(book);
+        }
     }
 }

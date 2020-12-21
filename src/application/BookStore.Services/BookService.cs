@@ -21,8 +21,8 @@ namespace BookStore.Services
             var result = new List<Book>();
 
             var bookDtos = _bookRepository.GetAllAvailable();
-            
-            foreach(var bookDto in bookDtos)
+
+            foreach (var bookDto in bookDtos)
             {
                 result.Add(new Book()
                 {
@@ -72,10 +72,42 @@ namespace BookStore.Services
             return isBookAdded;
         }
 
-        public bool Delete(int id)
+        public Book Update(Book book)
         {
-            var result = _bookRepository.Delete(id);
-            return result;
+            var bookDto = new BookDto()
+            {
+                Id = book.Id,
+                Name = book.Name,
+                Description = book.Description,
+                ReleaseDate = book.ReleaseDate
+            };
+
+            var goodDto = new GoodDto()
+            {
+                BookId = book.Id,
+                Count = book.Count,
+                Price = book.Price
+            };
+
+            _goodRepository.UpdateGood(goodDto);
+            var bookResult = _bookRepository.Update(bookDto);
+            
+            return new Book() 
+            {
+                Id = bookResult.Id,
+                Name = bookResult.Name,
+                Description = bookResult.Description,
+                ReleaseDate = bookResult.ReleaseDate,
+                Count = bookResult.Count,
+                Price = bookResult.Price
+            };
+        }
+
+
+        public bool Delete(int id)
+            {
+                var result = _bookRepository.Delete(id);
+                return result;
+            }
         }
     }
-}

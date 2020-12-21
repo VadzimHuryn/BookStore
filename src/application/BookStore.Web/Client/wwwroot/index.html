@@ -11,7 +11,13 @@
 </head>
 
 <body>
-    <app>Loading...</app>
+    <app>
+        <div class="modal-bg">
+            <div class="load-window-spinner spinner-border text-light" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </app>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -19,11 +25,6 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
-    <script>
-        $('#myModal').on('shown.bs.modal', function () {
-            $('#myInput').trigger('focus')
-        })
-    </script>
 </body>
 
 </html>

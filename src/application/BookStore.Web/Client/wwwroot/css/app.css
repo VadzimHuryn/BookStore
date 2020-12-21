@@ -47,7 +47,7 @@ app {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background-image: linear-gradient(180deg, indigo 0%, purple 70%);
 }
 
     .sidebar .top-row {
@@ -203,4 +203,17 @@ app {
     background: white;
     position: fixed;
     z-index: 3;
+}
+
+.load-window-spinner {
+    width: 100px;
+    height: 100px;
+    left: calc(50vw - 100px);
+    top: calc(50vh - 100px);
+    position: fixed;
+    z-index: 4;
+}
+
+.no-resize{
+    resize: none;
 }
