@@ -145,7 +145,7 @@
 
         <div class="form-group">
             <label>Seller</label>
-            <select class="form-control"  @bind="order.SellerId">
+            <select class="form-control" @bind="order.SellerId">
                 <option selected>-- select seller (if exist) --</option>
                 @foreach (var seller in sellers)
                 {
@@ -164,7 +164,12 @@
                     <option value="@orderStatus.Id">@orderStatus.Name</option>
                 }
             </select>
-            <ValidationMessage For="() => order.OrderStatusId" />
+            <ValidationMessage For="() => order.OrderStatusId" />f
+        </div>
+
+        <div class="form-group">
+            <label>Books</label>
+            <button type="submit" class="btn btn-outline-primary" data-dismiss="modal" @onclick="ShowBooksWindows">Choose books</button>
         </div>
 
         <div class="modal-footer">
@@ -178,6 +183,47 @@
 
 </BookStore.Web.Client.Components.LoadWindow>
 
+
+<BookStore.Web.Client.Components.WideModalWindow Show="IsShowBooksTableModal">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">ReleaseDate</th>
+                <th scope="col">Count</th>
+                <th scope="col">Price for one</th>
+                <th scope="col" style="text-align:center">Selected count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in books)
+            {
+                <tr class="clickable-row">
+                    <td scope="row">@book.Name</td>
+                    <td scope="row">@book.ReleaseDate.ToString("dd-MM-yyyy")</td>
+                    <td scope="row">@book.Count</td>
+                    <td scope="row">@book.Price</td>
+                    <td scope="row" style="text-align:center">
+                        <div style="display:inline-block">
+                            <button type="submit" class="btn btn-outline-danger btn-increment-decrement" data-dismiss="modal" @onclick="() => DeleteBook(book.Id)">
+                                <span>-</span>
+                            </button>
+                        </div>
+                        <div style="display:inline-block;max-width:87px;">
+                            <input type="number" readonly class="form-control" max="@book.Count" maxlength="@book.Count.ToString().Length" value="@(orderBooks.FirstOrDefault(x => x.BookId == book.Id)?.Count ?? 0)">
+                        </div>
+                        <div style="display:inline-block">
+                            <button type="submit" class="btn btn-outline-primary btn-increment-decrement" data-dismiss="modal" @onclick="() => AddBook(book.Id)">
+                                <span>+</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</BookStore.Web.Client.Components.WideModalWindow>
+
 @code
 {
     private Order order = new Order();
@@ -187,6 +233,8 @@
     private List<User> sellers = new List<User>();
     private List<UserRole> userRoles = new List<UserRole>();
     private List<OrderStatus> orderStatuses = new List<OrderStatus>();
+    private List<Book> books = new List<Book>();
+    private List<OrderBook> orderBooks = new List<OrderBook>();
 
     private DateTime OrderDate
     {
@@ -203,13 +251,9 @@
     private bool IsShowDescriptionModal { get; set; }
     private bool IsShowUpdateModal { get; set; }
     private bool IsShowLoadWindow { get; set; }
+    private bool IsShowBooksTableModal { get; set; }
 
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadOrders();
-        await LoadUsers();
-    }
+    #region Show/Hide
 
     protected void ShowAddOrderWindow()
     {
@@ -217,6 +261,16 @@
         this.IsShowAddModal = true;
         HideDeleteWindow();
         HideDescriptionWindow();
+    }
+
+    private void ShowBookTableWindow()
+    {
+        this.IsShowBooksTableModal = true;
+    }
+
+    private void HideBookTableWindow()
+    {
+        this.IsShowBooksTableModal = false;
     }
 
     protected void HideAddWindow()
@@ -232,6 +286,16 @@
     protected void HideDeleteWindow()
     {
         this.IsShowDeleteModal = false;
+    }
+
+    protected void ShowBooksWindows()
+    {
+        this.IsShowBooksTableModal = true;
+    }
+
+    protected void HideBooksWindows()
+    {
+        this.IsShowBooksTableModal = false;
     }
 
     protected async Task ShowAndLoadDescriptionWindow(int id)
@@ -258,11 +322,114 @@
         this.IsShowUpdateModal = true;
     }
 
+    #endregion
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+        await LoadUsers();
+        await LoadBooks();
+    }
+
+    #region Handlers
+
+    private void AddBook(int bookId)
+    {
+        var orderBook = orderBooks.FirstOrDefault(x => x.BookId == bookId);
+        var book = books.FirstOrDefault(x => x.Id == bookId);
+        if (orderBook == null)
+        {
+            if (book.Count != 0)
+            {
+                orderBook = new OrderBook()
+                {
+                    BookId = bookId,
+                    Count = 1
+                };
+
+                orderBooks.Add(orderBook);
+            }
+        }
+        else
+        {
+            if (book.Count > orderBook.Count)
+            {
+                orderBooks.First(x => x.BookId == bookId).Count++;
+            }
+        }
+    }
+
+    private void DeleteBook(int bookId)
+    {
+        var orderBook = orderBooks.FirstOrDefault(x => x.BookId == bookId);
+        var book = books.FirstOrDefault(x => x.Id == bookId);
+        if (orderBook != null)
+        {
+            if (orderBook.Count != 0)
+            {
+                orderBooks.First(x => x.BookId == bookId).Count--;
+            }
+            else
+            {
+                orderBooks.Remove(orderBook);
+            }
+        }
+    }
+
+    private void SetBookCount(int bookId, ChangeEventArgs e)
+    {
+        var orderBook = orderBooks.FirstOrDefault(x => x.BookId == bookId);
+        var book = books.FirstOrDefault(x => x.Id == bookId);
+
+        var isTrueParse = int.TryParse(e.Value.ToString().Replace("'", string.Empty), out int inputBookCount);
+        var isAvailableCount = book.Count <= inputBookCount;
+
+        var count = isTrueParse ? (isAvailableCount ? book.Count : inputBookCount) : book.Count;
+        if (!isTrueParse)
+        {
+            inputBookCount = count;
+        }
+
+        if (orderBook == null)
+        {
+            if (book.Count != 0)
+            {
+                orderBook = new OrderBook()
+                {
+                    BookId = bookId,
+                    Count = count
+                };
+
+                orderBooks.Add(orderBook);
+            }
+        }
+        else
+        {
+            orderBooks.First(x => x.BookId == bookId).Count = count;
+        }
+
+        if (inputBookCount <= 0)
+        {
+            orderBooks.Remove(orderBook);
+        }
+    }
+
+    #endregion
+
+    #region Load
+
     private async Task LoadOrders()
     {
         IsShowLoadWindow = true;
         orders = await Http.GetFromJsonAsync<List<OrderShort>>("Order");
         orderStatuses = await Http.GetFromJsonAsync<List<OrderStatus>>("Order/Statuses");
+        IsShowLoadWindow = false;
+    }
+
+    private async Task LoadBooks()
+    {
+        IsShowLoadWindow = true;
+        books = await Http.GetFromJsonAsync<List<Book>>("Book");
         IsShowLoadWindow = false;
     }
 
@@ -280,6 +447,10 @@
     {
         order = await Http.GetFromJsonAsync<Order>($"Order/{id}");
     }
+
+    #endregion
+
+    #region Add/Update/Delete
 
     private async Task AddOrder()
     {
@@ -320,4 +491,8 @@
         HideDeleteWindow();
         HideUpdateWindow();
     }
+
+    #endregion
+
+
 }

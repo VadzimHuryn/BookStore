@@ -205,6 +205,21 @@ app {
     z-index: 3;
 }
 
+.wide-modal-window {
+    width: 70%;
+    min-width: 500px;
+    padding: 20px;
+    margin: 0 auto;
+    top: 20px;
+    left: calc(50vw - 35%);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    background: white;
+    position: fixed;
+    z-index: 3;
+}
+
+
 .load-window-spinner {
     width: 100px;
     height: 100px;
@@ -216,4 +231,16 @@ app {
 
 .no-resize{
     resize: none;
+}
+
+.btn-increment-decrement{
+    width: 25px;
+    height: 25px;
+    padding: 0;
+}
+
+.disable-arrows {
+    -moz-appearance: textfield;
+    -webkit-appearance: none;
+    margin: 0;
 }

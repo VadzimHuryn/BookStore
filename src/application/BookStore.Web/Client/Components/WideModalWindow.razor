@@ -1,0 +1,18 @@
+﻿
+
+<div hidden="@(!Show)" class="wide-modal-window">
+    @ChildContent
+</div>
+
+<div hidden="@(!Show)" @onclick="@(() => Show = false)" class="modal-bg">
+
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public bool Show { get; set; }
+}
