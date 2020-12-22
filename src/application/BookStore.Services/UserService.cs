@@ -25,11 +25,13 @@ namespace BookStore.Services
             {
                 result.Add(new User()
                 {
+                    Id = userDto.Id,
                     UserId = userDto.UserId,
                     FirstName = userDto.FirstName,
                     LastName = userDto.LastName,
                     Email = userDto.Email,
-                    PhoneNumber = userDto.PhoneNumber
+                    PhoneNumber = userDto.PhoneNumber,
+                    UserRoleId = userDto.UserRoleId
                 });
             }
 

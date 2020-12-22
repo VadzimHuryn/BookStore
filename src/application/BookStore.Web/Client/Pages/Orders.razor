@@ -1,139 +1,174 @@
 ﻿
-@page "/Books"
+@page "/Orders"
 @inject HttpClient Http
 
-<h3>Books</h3>
+<h3>Orders</h3>
 
 <table class="table table-hover">
     <thead>
         <tr>
-            <th scope="col">Name</th>
-            <th scope="col">ReleaseDate</th>
-            <th scope="col">Available count</th>
-            <th scope="col">Current price</th>
+            <th scope="col">Id</th>
+            <th scope="col">Comment</th>
+            <th scope="col">Books count</th>
+            <th scope="col">Summary price</th>
+            <th scope="col">Order datetime</th>
+            <th scope="col">Order status</th>
+            <th scope="col">Seller</th>
+            <th scope="col">Buyer</th>
+            <th scope="col">Email</th>
+            <th scope="col">Phone number</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var book in books)
+        @foreach (var order in orders)
         {
-            <tr class="clickable-row" @onclick="() => ShowAndLoadDescriptionWindow(book.Id)">
-                <td scope="row">@book.Name</td>
-                <td scope="row">@book.ReleaseDate.ToString("dd-MM-yyyy")</td>
-                <td scope="row">@book.Count</td>
-                <td scope="row">@book.Price</td>
+            <tr class="clickable-row" @onclick="() => ShowAndLoadDescriptionWindow(order.Id)">
+                <td scope="row">@order.Id</td>
+                <td scope="row">@order.Comment</td>
+                <td scope="row">@order.BooksCount</td>
+                <td scope="row">@order.SummaryPrice</td>
+                <td scope="row">@order.OrderDateTime</td>
+                <td scope="row">@(orderStatuses.FirstOrDefault(x => x.Id == order.OrderStatusId).Name)</td>
+                <td scope="row">@order.SellerName</td>
+                <td scope="row">@order.BuyerName</td>
+                <td scope="row">@order.BuyerEmail</td>
+                <td scope="row">@order.BuyerPhoneNumber</td>
             </tr>
         }
     </tbody>
 </table>
 
-<button @onclick="ShowAddBookWindow" class="btn btn-outline-secondary">Add book</button>
+<button @onclick="ShowAddOrderWindow" class="btn btn-outline-secondary">Checkout</button>
 
-<BookStore.Web.Client.Components.ModalWindow Show="@IsShowDescriptionModal">
-    <p class="font-weight-bold">Name</p>
-    <p class="text-justify font-weight-normal">@book.Name</p>
-    <p class="font-weight-bold">Description</p>
-    <p><textarea class="form-control no-resize" rows="10" readonly>@book.Description</textarea></p>
-    <p class="font-weight-bold">Release date</p>
-    <p class="text-justify font-weight-normal">@book.ReleaseDate.ToString("dd-MM-yyyy")</p>
-    <p class="font-weight-bold">Available count</p>
-    <p class="text-justify font-weight-normal">@book.Count</p>
-    <p class="font-weight-bold">Current price</p>
-    <p class="text-justify font-weight-normal">@book.Price</p>
+@*<BookStore.Web.Client.Components.ModalWindow Show="@IsShowDescriptionModal">
+        <p class="font-weight-bold">Name</p>
+        <p class="text-justify font-weight-normal">@book.Name</p>
+        <p class="font-weight-bold">Description</p>
+        <p><textarea class="form-control no-resize" rows="10" readonly>@book.Description</textarea></p>
+        <p class="font-weight-bold">Release date</p>
+        <p class="text-justify font-weight-normal">@book.ReleaseDate.ToString("dd-MM-yyyy")</p>
+        <p class="font-weight-bold">Available count</p>
+        <p class="text-justify font-weight-normal">@book.Count</p>
+        <p class="font-weight-bold">Current price</p>
+        <p class="text-justify font-weight-normal">@book.Price</p>
 
-    <div class="modal-footer">
-        <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteWindow">Delete</button>
-        <button type="button" class="btn btn-outline-secondary" @onclick="ShowUpdateWindow">Update</button>
-        <button type="button" class="btn btn-outline-secondary" @onclick="HideDescriptionWindow">Cancel</button>
-    </div>
-</BookStore.Web.Client.Components.ModalWindow>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteWindow">Delete</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="ShowUpdateWindow">Update</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="HideDescriptionWindow">Cancel</button>
+        </div>
+    </BookStore.Web.Client.Components.ModalWindow>
 
-<BookStore.Web.Client.Components.ModalWindow Show="@IsShowDeleteModal">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Delete book</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDeleteWindow">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+    <BookStore.Web.Client.Components.ModalWindow Show="@IsShowDeleteModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete book</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDeleteWindow">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The book will be deleted from catalog.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="HideDeleteWindow">Cancel</button>
+                    <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBook(book.Id)">Confirm</button>
+                </div>
             </div>
-            <div class="modal-body">
-                The book will be deleted from catalog.
+        </div>
+    </BookStore.Web.Client.Components.ModalWindow>
+
+    <BookStore.Web.Client.Components.ModalWindow Show="@IsShowUpdateModal">
+        <EditForm Model="book" OnValidSubmit="@UpdateSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <p class="font-weight-bold">Name</p>
+                <InputText class="form-control" @bind-Value="book.Name" />
+                <ValidationMessage For="() => book.Name" />
+            </div>
+            <div class="form-group">
+                <p class="font-weight-bold">Description</p>
+                <InputTextArea rows="10" class="form-control no-resize" @bind-Value="book.Description" />
+                <ValidationMessage For="() => book.Description" />
+            </div>
+            <div class="form-group">
+                <p class="font-weight-bold">Release date</p>
+                <InputDate resize="no" class="form-control" @bind-Value="book.ReleaseDate" />
+                <ValidationMessage For="() => book.ReleaseDate" />
+            </div>
+            <div class="form-group">
+                <p class="font-weight-bold">Available count</p>
+                <InputNumber class="form-control" @bind-Value="book.Count" />
+                <ValidationMessage For="() => book.Count" />
+            </div>
+            <div class="form-group">
+                <p class="font-weight-bold">Current price</p>
+                <InputNumber class="form-control" @bind-Value="book.Price" />
+                <ValidationMessage For="() => book.Price" />
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="HideDeleteWindow">Cancel</button>
-                <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBook(book.Id)">Confirm</button>
+                <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Confirm</button>
+                <button type="button" class="btn btn-outline-secondary" @onclick="HideUpdateWindow">Cancel</button>
             </div>
-        </div>
-    </div>
-</BookStore.Web.Client.Components.ModalWindow>
-
-<BookStore.Web.Client.Components.ModalWindow Show="@IsShowUpdateModal">
-    <EditForm Model="book" OnValidSubmit="@UpdateSubmit">
-        <DataAnnotationsValidator />
-
-        <div class="form-group">
-            <p class="font-weight-bold">Name</p>
-            <InputText class="form-control" @bind-Value="book.Name" />
-            <ValidationMessage For="() => book.Name" />
-        </div>
-        <div class="form-group">
-            <p class="font-weight-bold">Description</p>
-            <InputTextArea rows="10" class="form-control no-resize" @bind-Value="book.Description" />
-            <ValidationMessage For="() => book.Description" />
-        </div>
-        <div class="form-group">
-            <p class="font-weight-bold">Release date</p>
-            <InputDate resize="no" class="form-control" @bind-Value="book.ReleaseDate" />
-            <ValidationMessage For="() => book.ReleaseDate" />
-        </div>
-        <div class="form-group">
-            <p class="font-weight-bold">Available count</p>
-            <InputNumber class="form-control" @bind-Value="book.Count" />
-            <ValidationMessage For="() => book.Count" />
-        </div>
-        <div class="form-group">
-            <p class="font-weight-bold">Current price</p>
-            <InputNumber class="form-control" @bind-Value="book.Price" />
-            <ValidationMessage For="() => book.Price" />
-        </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Confirm</button>
-            <button type="button" class="btn btn-outline-secondary" @onclick="HideUpdateWindow">Cancel</button>
-        </div>
-    </EditForm>
-</BookStore.Web.Client.Components.ModalWindow>
+        </EditForm>
+    </BookStore.Web.Client.Components.ModalWindow>*@
 
 <BookStore.Web.Client.Components.ModalWindow Show="@IsShowAddModal">
-    <EditForm Model="book" OnValidSubmit="@AddSubmit">
+    <EditForm Model="order" OnValidSubmit="@AddSubmit">
         <DataAnnotationsValidator />
 
         <div class="form-group">
-            <label>Name</label>
-            <InputText class="form-control" @bind-Value="book.Name" />
-            <ValidationMessage For="() => book.Name" />
+            <label>Comment</label>
+            <InputText class="form-control" @bind-Value="order.Comment" />
+            <ValidationMessage For="() => order.Comment" />
         </div>
+
         <div class="form-group">
             <label>Description</label>
-            <InputTextArea class="form-control no-resize" @bind-Value="book.Description" />
-            <ValidationMessage For="() => book.Description" />
+            <InputDate class="form-control" @bind-Value="OrderDate" />
+            <ValidationMessage For="() => order.OrderDateTime" />
         </div>
+
         <div class="form-group">
-            <label>Description</label>
-            <InputDate class="form-control" @bind-Value="ReleaseDate" />
-            <ValidationMessage For="() => book.ReleaseDate" />
+            <label>Buyer</label>
+            <select class="form-control" @bind="order.BuyerId">
+                <option selected>-- select buyer (if exist) --</option>
+                @foreach (var buyer in buyers)
+                {
+                    <option value="@buyer.Id">@buyer.FirstName @buyer.LastName @buyer.PhoneNumber</option>
+                }
+            </select>
+            <ValidationMessage For="() => order.BuyerId" />
         </div>
+
         <div class="form-group">
-            <label>Available count</label>
-            <InputNumber class="form-control" @bind-Value="book.Count" />
-            <ValidationMessage For="() => book.Count" />
+            <label>Seller</label>
+            <select class="form-control"  @bind="order.SellerId">
+                <option selected>-- select seller (if exist) --</option>
+                @foreach (var seller in sellers)
+                {
+                    <option value="@seller.Id">@seller.FirstName @seller.LastName @seller.PhoneNumber</option>
+                }
+            </select>
+            <ValidationMessage For="() => order.SellerId" />
         </div>
+
         <div class="form-group">
-            <label>Current price</label>
-            <InputNumber class="form-control" @bind-Value="book.Price" />
-            <ValidationMessage For="() => book.Price" />
+            <label>Order status</label>
+            <select class="form-control" @bind="order.OrderStatusId">
+                <option selected>-- select status --</option>
+                @foreach (var orderStatus in orderStatuses)
+                {
+                    <option value="@orderStatus.Id">@orderStatus.Name</option>
+                }
+            </select>
+            <ValidationMessage For="() => order.OrderStatusId" />
         </div>
+
         <div class="modal-footer">
-            <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Add</button>
+            <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Confirm</button>
             <button type="button" class="btn btn-outline-secondary" @onclick="HideAddWindow">Cancel</button>
         </div>
     </EditForm>
@@ -145,17 +180,24 @@
 
 @code
 {
-    private Book book = new Book();
-    private List<Book> books = new List<Book>();
-    private DateTime ReleaseDate
+    private Order order = new Order();
+    private List<OrderShort> orders = new List<OrderShort>();
+    private List<User> users = new List<User>();
+    private List<User> buyers = new List<User>();
+    private List<User> sellers = new List<User>();
+    private List<UserRole> userRoles = new List<UserRole>();
+    private List<OrderStatus> orderStatuses = new List<OrderStatus>();
+
+    private DateTime OrderDate
     {
         get
         {
-            book.ReleaseDate = book.ReleaseDate == default(DateTime) ? DateTime.Now : book.ReleaseDate;
-            return book.ReleaseDate;
+            order.OrderDateTime = order.OrderDateTime == default(DateTime) ? DateTime.Now : order.OrderDateTime;
+            return order.OrderDateTime;
         }
-        set => book.ReleaseDate = value;
+        set => order.OrderDateTime = value;
     }
+
     private bool IsShowAddModal { get; set; }
     private bool IsShowDeleteModal { get; set; }
     private bool IsShowDescriptionModal { get; set; }
@@ -165,12 +207,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadBooks();
+        await LoadOrders();
+        await LoadUsers();
     }
 
-    protected void ShowAddBookWindow()
+    protected void ShowAddOrderWindow()
     {
-        book = new Book();
+        order = new Order();
         this.IsShowAddModal = true;
         HideDeleteWindow();
         HideDescriptionWindow();
@@ -196,7 +239,7 @@
         HideUpdateWindow();
         HideDeleteWindow();
         HideAddWindow();
-        await LoadBookById(id);
+        await LoadOrderById(id);
         this.IsShowDescriptionModal = true;
     }
 
@@ -215,33 +258,44 @@
         this.IsShowUpdateModal = true;
     }
 
-    private async Task LoadBooks()
+    private async Task LoadOrders()
     {
         IsShowLoadWindow = true;
-        books = await Http.GetFromJsonAsync<List<Book>>("Book");
+        orders = await Http.GetFromJsonAsync<List<OrderShort>>("Order");
+        orderStatuses = await Http.GetFromJsonAsync<List<OrderStatus>>("Order/Statuses");
         IsShowLoadWindow = false;
     }
 
-    private async Task LoadBookById(int id)
+    private async Task LoadUsers()
     {
-        book = await Http.GetFromJsonAsync<Book>($"Book/{id}");
+        this.IsShowLoadWindow = true;
+        users = await Http.GetFromJsonAsync<List<User>>("User");
+        userRoles = await Http.GetFromJsonAsync<List<UserRole>>("User/Roles");
+        buyers = users.Where(x => userRoles.FirstOrDefault(y => y.Code == "Buyer").Id == x.UserRoleId).ToList();
+        sellers = users.Where(x => userRoles.FirstOrDefault(y => y.Code == "Seller").Id == x.UserRoleId).ToList();
+        this.IsShowLoadWindow = false;
     }
 
-    private async Task AddBook()
+    private async Task LoadOrderById(int id)
     {
-        await Http.PostAsJsonAsync("Book", book);
+        order = await Http.GetFromJsonAsync<Order>($"Order/{id}");
     }
 
-    private async Task UpdateBook()
+    private async Task AddOrder()
     {
-        var result = await Http.PutAsJsonAsync("Book", book);
-        book = await result.Content.ReadFromJsonAsync<Book>();
+        await Http.PostAsJsonAsync("Order", order);
     }
 
-    private async Task DeleteBook(int id)
+    private async Task UpdateOrder()
+    {
+        var result = await Http.PutAsJsonAsync("Order", order);
+        order = await result.Content.ReadFromJsonAsync<Order>();
+    }
+
+    private async Task DeleteOrder(int id)
     {
         await Http.DeleteAsync($"Book/{id}");
-        await LoadBooks();
+        await LoadOrders();
         HideDeleteWindow();
         HideDescriptionWindow();
         HideUpdateWindow();
@@ -249,8 +303,9 @@
 
     protected async Task AddSubmit()
     {
-        await AddBook();
-        await LoadBooks();
+        await AddOrder();
+        await LoadOrders();
+        await LoadUsers();
         HideAddWindow();
         HideDeleteWindow();
         HideDescriptionWindow();
@@ -259,8 +314,8 @@
 
     protected async Task UpdateSubmit()
     {
-        await UpdateBook();
-        await LoadBooks();
+        await UpdateOrder();
+        await LoadOrders();
         HideAddWindow();
         HideDeleteWindow();
         HideUpdateWindow();

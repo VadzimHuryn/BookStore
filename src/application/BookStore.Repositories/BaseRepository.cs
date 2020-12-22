@@ -61,6 +61,15 @@ namespace BookStore.Repositories
             }
         }
 
+        public T GetById<T>(string sql, int id)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var result = connection.QueryFirst<T>(sql, new { Id = id });
+                return result;
+            }
+        }
+
         public int Execute<T>(string sql, T model)
         {
             using (var connection = new SqlConnection(_connectionString))

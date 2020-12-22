@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BookStore.Models.ViewModels
 {
-    public class User
+    public class User: BaseModel
     {
         [Required]
         [MinLength(3)]
