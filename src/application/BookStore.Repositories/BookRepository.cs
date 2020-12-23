@@ -11,6 +11,7 @@ namespace BookStore.Repositories
                                           	     [b].[Name],
                                           	     [b].[Description],
                                           	     [b].[ReleaseDate],
+                                                 [b].[Image],
                                           	     [g].[Count],
                                           	     [g].[Price]
                                           FROM [dbo].[Book] [b]
@@ -42,13 +43,13 @@ namespace BookStore.Repositories
 
         public int Add(BookDto book)
         {
-            var result = QuerySingle($@"INSERT INTO [dbo].[Book]([Name], [Description], [ReleaseDate]) OUTPUT INSERTED.Id VALUES (@Name, @Description, @ReleaseDate)", book);
+            var result = QuerySingle($@"INSERT INTO [dbo].[Book]([Name], [Description], [ReleaseDate], [Image]) OUTPUT INSERTED.Id VALUES (@Name, @Description, @ReleaseDate, @Image)", book);
             return result;
         }
 
         public BookOutputDto Update(BookDto book)
         {
-            Execute($@"UPDATE [dbo].[Book] SET [Name] = @Name, [Description] = @Description, [ReleaseDate] = @ReleaseDate WHERE [Id] = @Id", book);
+            Execute($@"UPDATE [dbo].[Book] SET [Name] = @Name, [Description] = @Description, [ReleaseDate] = @ReleaseDate, [Image] = @Image WHERE [Id] = @Id", book);
             var result = GetById(book.Id);
             return result;
         }

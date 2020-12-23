@@ -7,6 +7,7 @@
 <table class="table table-hover">
     <thead>
         <tr>
+            <th scope="col">Id</th>
             <th scope="col">Name</th>
             <th scope="col">ReleaseDate</th>
             <th scope="col">Available count</th>
@@ -17,6 +18,7 @@
         @foreach (var book in books)
         {
             <tr class="clickable-row" @onclick="() => ShowAndLoadDescriptionWindow(book.Id)">
+                <td scope="row">@book.Id</td>
                 <td scope="row">@book.Name</td>
                 <td scope="row">@book.ReleaseDate.ToString("dd-MM-yyyy")</td>
                 <td scope="row">@book.Count</td>
@@ -29,16 +31,36 @@
 <button @onclick="ShowAddBookWindow" class="btn btn-outline-secondary">Add book</button>
 
 <BookStore.Web.Client.Components.ModalWindow Show="@IsShowDescriptionModal">
-    <p class="font-weight-bold">Name</p>
-    <p class="text-justify font-weight-normal">@book.Name</p>
-    <p class="font-weight-bold">Description</p>
-    <p><textarea class="form-control no-resize" rows="10" readonly>@book.Description</textarea></p>
-    <p class="font-weight-bold">Release date</p>
-    <p class="text-justify font-weight-normal">@book.ReleaseDate.ToString("dd-MM-yyyy")</p>
-    <p class="font-weight-bold">Available count</p>
-    <p class="text-justify font-weight-normal">@book.Count</p>
-    <p class="font-weight-bold">Current price</p>
-    <p class="text-justify font-weight-normal">@book.Price</p>
+    <table>
+        <tbody>
+            <tr>
+                <td style="padding-right:10px;">
+                    <div>
+                        <p class="font-weight-bold">Name</p>
+                        <p class="text-justify font-weight-normal">@book.Name</p>
+                        <p class="font-weight-bold">Description</p>
+                        <p><textarea class="form-control no-resize" rows="10" readonly>@book.Description</textarea></p>
+                        <p class="font-weight-bold">Release date</p>
+                        <p class="text-justify font-weight-normal">@book.ReleaseDate.ToString("dd-MM-yyyy")</p>
+                        <p class="font-weight-bold">Available count</p>
+                        <p class="text-justify font-weight-normal">@book.Count</p>
+                        <p class="font-weight-bold">Current price</p>
+                        <p class="text-justify font-weight-normal">@book.Price</p>
+                    </div>
+                </td>
+                <td style="vertical-align:top;">
+                    <div>
+                        <div class="form-group">
+                            <label class="font-weight-bold" style="width:100%">Picture</label>
+                            <div style="text-align:center; width:100%;">
+                                <img class="img-thumbnail" src="@book.Image" />
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
     <div class="modal-footer">
         <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteWindow">Delete</button>
@@ -70,32 +92,52 @@
 <BookStore.Web.Client.Components.ModalWindow Show="@IsShowUpdateModal">
     <EditForm Model="book" OnValidSubmit="@UpdateSubmit">
         <DataAnnotationsValidator />
-
-        <div class="form-group">
-            <p class="font-weight-bold">Name</p>
-            <InputText class="form-control" @bind-Value="book.Name" />
-            <ValidationMessage For="() => book.Name" />
-        </div>
-        <div class="form-group">
-            <p class="font-weight-bold">Description</p>
-            <InputTextArea rows="10" class="form-control no-resize" @bind-Value="book.Description" />
-            <ValidationMessage For="() => book.Description" />
-        </div>
-        <div class="form-group">
-            <p class="font-weight-bold">Release date</p>
-            <InputDate resize="no" class="form-control" @bind-Value="book.ReleaseDate" />
-            <ValidationMessage For="() => book.ReleaseDate" />
-        </div>
-        <div class="form-group">
-            <p class="font-weight-bold">Available count</p>
-            <InputNumber class="form-control" @bind-Value="book.Count" />
-            <ValidationMessage For="() => book.Count" />
-        </div>
-        <div class="form-group">
-            <p class="font-weight-bold">Current price</p>
-            <InputNumber class="form-control" @bind-Value="book.Price" />
-            <ValidationMessage For="() => book.Price" />
-        </div>
+        <table>
+            <tbody>
+                <tr>
+                    <td style="padding-right:10px;">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Name</label>
+                            <InputText class="form-control" @bind-Value="book.Name" />
+                            <ValidationMessage For="() => book.Name" />
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Description</label>
+                            <InputTextArea class="form-control no-resize" @bind-Value="book.Description" />
+                            <ValidationMessage For="() => book.Description" />
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Release date</label>
+                            <InputDate class="form-control" @bind-Value="ReleaseDate" />
+                            <ValidationMessage For="() => book.ReleaseDate" />
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Available count</label>
+                            <InputNumber class="form-control" @bind-Value="book.Count" />
+                            <ValidationMessage For="() => book.Count" />
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Current price</label>
+                            <InputNumber class="form-control" @bind-Value="book.Price" />
+                            <ValidationMessage For="() => book.Price" />
+                        </div>
+                    </td>
+                    <td style="vertical-align:top;">
+                        <div class="form-group">
+                            <label class="font-weight-bold" style="width:100%">Picture</label>
+                            <div class="custom-file">
+                                <InputFile class="custom-file-input" OnChange="@OnInputFileChange" />
+                                <label class="custom-file-label" for="validatedCustomFile">Choose image...</label>
+                                <div class="invalid-feedback">Example invalid custom file feedback</div>
+                            </div>
+                            <div style="text-align:center; width:100%;">
+                                <img class="img-thumbnail" src="@book.Image" />
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         <div class="modal-footer">
             <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Confirm</button>
             <button type="button" class="btn btn-outline-secondary" @onclick="HideUpdateWindow">Cancel</button>
@@ -106,32 +148,52 @@
 <BookStore.Web.Client.Components.ModalWindow Show="@IsShowAddModal">
     <EditForm Model="book" OnValidSubmit="@AddSubmit">
         <DataAnnotationsValidator />
-
-        <div class="form-group">
-            <label>Name</label>
-            <InputText class="form-control" @bind-Value="book.Name" />
-            <ValidationMessage For="() => book.Name" />
-        </div>
-        <div class="form-group">
-            <label>Description</label>
-            <InputTextArea class="form-control no-resize" @bind-Value="book.Description" />
-            <ValidationMessage For="() => book.Description" />
-        </div>
-        <div class="form-group">
-            <label>Description</label>
-            <InputDate class="form-control" @bind-Value="ReleaseDate" />
-            <ValidationMessage For="() => book.ReleaseDate" />
-        </div>
-        <div class="form-group">
-            <label>Available count</label>
-            <InputNumber class="form-control" @bind-Value="book.Count" />
-            <ValidationMessage For="() => book.Count" />
-        </div>
-        <div class="form-group">
-            <label>Current price</label>
-            <InputNumber class="form-control" @bind-Value="book.Price" />
-            <ValidationMessage For="() => book.Price" />
-        </div>
+        <table>
+            <tbody>
+                <tr>
+                    <td style="padding-right:10px;">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Name</label>
+                            <InputText class="form-control" @bind-Value="book.Name" />
+                            <ValidationMessage For="() => book.Name" />
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Description</label>
+                            <InputTextArea class="form-control no-resize" @bind-Value="book.Description" />
+                            <ValidationMessage For="() => book.Description" />
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Release date</label>
+                            <InputDate class="form-control" @bind-Value="ReleaseDate" />
+                            <ValidationMessage For="() => book.ReleaseDate" />
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Available count</label>
+                            <InputNumber class="form-control" @bind-Value="book.Count" />
+                            <ValidationMessage For="() => book.Count" />
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Current price</label>
+                            <InputNumber class="form-control" @bind-Value="book.Price" />
+                            <ValidationMessage For="() => book.Price" />
+                        </div>
+                    </td>
+                    <td style="vertical-align:top;">
+                        <div class="form-group">
+                            <label class="font-weight-bold" style="width:100%">Picture</label>
+                            <div class="custom-file">
+                                <InputFile class="custom-file-input" OnChange="@OnInputFileChange" />
+                                <label class="custom-file-label" for="validatedCustomFile">Choose image...</label>
+                                <div class="invalid-feedback">Example invalid custom file feedback</div>
+                            </div>
+                            <div style="text-align:center; width:100%;">
+                                <img class="img-thumbnail" src="@book.Image" />
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         <div class="modal-footer">
             <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Add</button>
             <button type="button" class="btn btn-outline-secondary" @onclick="HideAddWindow">Cancel</button>
@@ -165,6 +227,22 @@
     private bool IsShowLoadWindow { get; set; }
 
 
+    private IList<string> imageDataUrls = new List<string>();
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var format = "image/png";
+
+        var imageFile = e.File;
+
+        var resizedImageFile = await imageFile.RequestImageFileAsync(format, 240, 240);
+        var buffer = new byte[resizedImageFile.Size];
+        await resizedImageFile.OpenReadStream().ReadAsync(buffer);
+        var imageDataUrl = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+        book.Image = imageDataUrl;
+
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await LoadBooks();
@@ -173,48 +251,67 @@
     protected void ShowAddBookWindow()
     {
         book = new Book();
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
         this.IsShowAddModal = true;
-        HideDeleteWindow();
-        HideDescriptionWindow();
     }
 
     protected void HideAddWindow()
     {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
         this.IsShowAddModal = false;
     }
 
     protected void ShowDeleteWindow()
     {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
         this.IsShowDeleteModal = true;
+        this.IsShowAddModal = false;
     }
 
     protected void HideDeleteWindow()
     {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
         this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
     }
 
     protected async Task ShowAndLoadDescriptionWindow(int id)
     {
-        HideUpdateWindow();
-        HideDeleteWindow();
-        HideAddWindow();
         await LoadBookById(id);
         this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
     }
 
     private void HideDescriptionWindow()
     {
         this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
     }
 
     private void HideUpdateWindow()
     {
+        this.IsShowDescriptionModal = true;
         this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
     }
 
     private void ShowUpdateWindow()
     {
+        this.IsShowDescriptionModal = false;
         this.IsShowUpdateModal = true;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
     }
     private async Task LoadBooks()
     {
@@ -231,39 +328,49 @@
     private async Task AddBook()
     {
         await Http.PostAsJsonAsync("Book", book);
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
     }
 
     private async Task UpdateBook()
     {
         var result = await Http.PutAsJsonAsync("Book", book);
         book = await result.Content.ReadFromJsonAsync<Book>();
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
     }
 
     private async Task DeleteBook(int id)
     {
         await Http.DeleteAsync($"Book/{id}");
         await LoadBooks();
-        HideDeleteWindow();
-        HideDescriptionWindow();
-        HideUpdateWindow();
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
     }
 
     protected async Task AddSubmit()
     {
         await AddBook();
         await LoadBooks();
-        HideAddWindow();
-        HideDeleteWindow();
-        HideDescriptionWindow();
-        HideUpdateWindow();
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
     }
 
     protected async Task UpdateSubmit()
     {
         await UpdateBook();
         await LoadBooks();
-        HideAddWindow();
-        HideDeleteWindow();
-        HideUpdateWindow();
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
     }
 }

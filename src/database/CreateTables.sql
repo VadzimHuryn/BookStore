@@ -4,6 +4,7 @@ CREATE TABLE [Book]
 	[Name] NVARCHAR(256) NOT NULL,
 	[Description] NVARCHAR(MAX) NULL,
 	[ReleaseDate] DATETIME NULL,
+	[Image] NVARCHAR(MAX) NULL,
 	[IsDisabled] BIT NOT NULL DEFAULT (0)
 )
 GO

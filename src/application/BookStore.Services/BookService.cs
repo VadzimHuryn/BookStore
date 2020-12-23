@@ -31,7 +31,8 @@ namespace BookStore.Services
                     Description = bookDto.Description,
                     ReleaseDate = bookDto.ReleaseDate,
                     Price = bookDto.Price,
-                    Count = bookDto.Count
+                    Count = bookDto.Count,
+                    Image = bookDto.Image
                 });
             }
 
@@ -46,6 +47,7 @@ namespace BookStore.Services
             {
                 Id = bookDto.Id,
                 Name = bookDto.Name,
+                Image = bookDto.Image,
                 Description = bookDto.Description,
                 ReleaseDate = bookDto.ReleaseDate,
                 Price = bookDto.Price,
@@ -59,7 +61,8 @@ namespace BookStore.Services
             {
                 Name = book.Name,
                 Description = book.Description,
-                ReleaseDate = book.ReleaseDate
+                ReleaseDate = book.ReleaseDate,
+                Image = book.Image
             });
 
             var isBookAdded = _goodRepository.AddGood(new GoodDto()
@@ -79,7 +82,8 @@ namespace BookStore.Services
                 Id = book.Id,
                 Name = book.Name,
                 Description = book.Description,
-                ReleaseDate = book.ReleaseDate
+                ReleaseDate = book.ReleaseDate,
+                Image = book.Image
             };
 
             var goodDto = new GoodDto()
@@ -99,7 +103,8 @@ namespace BookStore.Services
                 Description = bookResult.Description,
                 ReleaseDate = bookResult.ReleaseDate,
                 Count = bookResult.Count,
-                Price = bookResult.Price
+                Price = bookResult.Price,
+                Image = bookResult.Image
             };
         }
 
