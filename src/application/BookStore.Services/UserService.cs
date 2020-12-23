@@ -63,7 +63,7 @@ namespace BookStore.Services
             var dto = new UserDto()
             {
                 UserId = user.UserId,
-                Password = user.Password,
+                Password = user.Password ?? string.Empty,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,

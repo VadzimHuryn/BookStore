@@ -1,0 +1,78 @@
+﻿<table>
+    <tr>
+        <td style="width:130px">
+            <nav aria-label="...">
+                <ul class="pagination">
+                    <li class="page-item @(PageItemCount == 5 ? "active" : "")" @onclick="() => { PageItemCount = 5; PageItemCountChanged.InvokeAsync(PageItemCount); }">
+                        <a class="page-link">5</a>
+                    </li>
+                    <li class="page-item @(PageItemCount == 10 ? "active" : "")" @onclick="() => { PageItemCount = 10; PageItemCountChanged.InvokeAsync(PageItemCount);}">
+                        <a class="page-link">10</a>
+                    </li>
+                    @if (IsShow15ItemsButton)
+                    {
+                        <li class="page-item @(PageItemCount == 15 ? "active" : "")" @onclick="() => { PageItemCount = 15; PageItemCountChanged.InvokeAsync(PageItemCount);}">
+                            <a class="page-link">15</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </td>
+        <td>
+            <nav aria-label="...">
+                <ul class="pagination">
+                    <li class="page-item @(CurrentPageId == 0 ? "disabled" : "")" @onclick="GoToPreviousPage">
+                        <a class="page-link">Previous</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link">@(CurrentPageId + 1)</a>
+                    </li>
+                    <li class="page-item @(CurrentPageId == PagesCount ? "disabled" : "")" @onclick="GoToNextPage">
+                        <a class="page-link">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </td>
+    </tr>
+</table>
+
+@code {
+
+    [Parameter]
+    public bool IsShow15ItemsButton { get; set; } = true;
+
+    [Parameter]
+    public int CurrentPageId { get; set; }
+    [Parameter]
+    public EventCallback<int> CurrentPageIdChanged { get; set; }
+
+    [Parameter]
+    public int PageItemCount { get; set; }
+    [Parameter]
+    public EventCallback<int> PageItemCountChanged { get; set; }
+
+    [Parameter]
+    public int ItemsCount { get; set; }
+    public int PagesCount { get => ItemsCount / PageItemCount; }
+
+
+
+
+    private void GoToPreviousPage()
+    {
+        if (CurrentPageId > 0)
+        {
+            CurrentPageId--;
+            CurrentPageIdChanged.InvokeAsync(CurrentPageId);
+        }
+    }
+
+    private void GoToNextPage()
+    {
+        if (CurrentPageId != PagesCount)
+        {
+            CurrentPageId++;
+            CurrentPageIdChanged.InvokeAsync(CurrentPageId);
+        }
+    }
+}

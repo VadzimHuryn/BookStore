@@ -27,12 +27,7 @@ namespace BookStore.Models.ViewModels
         [Required]
         [Phone]
         public string PhoneNumber { get; set; }
-
-        [Required]
-        [MinLength(8)]
-        [MaxLength(256)]
         public string Password { get; set; }
-
         [Required]
         [Range(1, 3, ErrorMessage = "Please choose a user role")]
         public int UserRoleId { get; set; }

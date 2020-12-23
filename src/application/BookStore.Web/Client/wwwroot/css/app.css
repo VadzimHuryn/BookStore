@@ -244,3 +244,19 @@ app {
     -webkit-appearance: none;
     margin: 0;
 }
+
+.file-load-fill-container {
+    position:absolute;
+    z-index:10;
+    height: auto;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.without-padding{
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+}

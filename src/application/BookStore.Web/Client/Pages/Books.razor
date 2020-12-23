@@ -4,37 +4,60 @@
 
 <h3>Books</h3>
 
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th scope="col">Id</th>
-            <th scope="col">Name</th>
-            <th scope="col">ReleaseDate</th>
-            <th scope="col">Available count</th>
-            <th scope="col">Current price</th>
-        </tr>
-    </thead>
+<table style="width:100%">
     <tbody>
-        @foreach (var book in books)
-        {
-            <tr class="clickable-row" @onclick="() => ShowAndLoadDescriptionWindow(book.Id)">
-                <td scope="row">@book.Id</td>
-                <td scope="row">@book.Name</td>
-                <td scope="row">@book.ReleaseDate.ToString("dd-MM-yyyy")</td>
-                <td scope="row">@book.Count</td>
-                <td scope="row">@book.Price</td>
-            </tr>
-        }
+        <tr>
+            <td>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Id</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">ReleaseDate</th>
+                            <th scope="col">Available count</th>
+                            <th scope="col">Current price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var book in books.Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
+                        {
+                            <tr class="clickable-row" @onclick="() => ShowAndLoadDescriptionWindow(book.Id)">
+                                <td scope="row">@book.Id</td>
+                                <td scope="row">@book.Name</td>
+                                <td scope="row">@book.ReleaseDate.ToString("dd-MM-yyyy")</td>
+                                <td scope="row">@book.Count</td>
+                                <td scope="row">@book.Price</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <BookStore.Web.Client.Components.Pagination ItemsCount="@books.Count" @bind-CurrentPageId="CurrentPageId" @bind-PageItemCount="PageItemCount">
+
+                </BookStore.Web.Client.Components.Pagination>
+            </td>
+        </tr>
+        <tr>
+            <td><button @onclick="ShowAddBookWindow" class="btn btn-outline-secondary">Add book</button></td>
+        </tr>
     </tbody>
 </table>
 
-<button @onclick="ShowAddBookWindow" class="btn btn-outline-secondary">Add book</button>
-
 <BookStore.Web.Client.Components.ModalWindow Show="@IsShowDescriptionModal">
-    <table>
+
+    <div class="modal-header form-group without-padding">
+        <h5 class="modal-title">Book description</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDescriptionWindow">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <table style="width:100%">
         <tbody>
             <tr>
-                <td style="padding-right:10px;">
+                <td style="padding-right:10px; width:55%;">
                     <div>
                         <p class="font-weight-bold">Name</p>
                         <p class="text-justify font-weight-normal">@book.Name</p>
@@ -48,20 +71,19 @@
                         <p class="text-justify font-weight-normal">@book.Price</p>
                     </div>
                 </td>
-                <td style="vertical-align:top;">
+                <td style="vertical-align:top; width:45%;">
                     <div>
-                        <div class="form-group">
-                            <label class="font-weight-bold" style="width:100%">Picture</label>
-                            <div style="text-align:center; width:100%;">
-                                <img class="img-thumbnail" src="@book.Image" />
-                            </div>
+                        <label class="font-weight-bold" style="width:100%">Picture</label>
+                    </div>
+                    <div class="form-group">
+                        <div style="text-align:center; width:100%;">
+                            <img class="img-thumbnail" src="@(string.IsNullOrEmpty(book.Image) ? "img/default.jpg" :book.Image)" />
                         </div>
                     </div>
                 </td>
             </tr>
         </tbody>
     </table>
-
     <div class="modal-footer">
         <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteWindow">Delete</button>
         <button type="button" class="btn btn-outline-secondary" @onclick="ShowUpdateWindow">Update</button>
@@ -70,32 +92,34 @@
 </BookStore.Web.Client.Components.ModalWindow>
 
 <BookStore.Web.Client.Components.ModalWindow Show="@IsShowDeleteModal">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Delete book</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDeleteWindow">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                The book will be deleted from catalog.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="HideDeleteWindow">Cancel</button>
-                <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBook(book.Id)">Confirm</button>
-            </div>
-        </div>
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete book</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDeleteWindow">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        The book will be deleted from catalog.
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="HideDeleteWindow">Cancel</button>
+        <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBook(book.Id)">Confirm</button>
     </div>
 </BookStore.Web.Client.Components.ModalWindow>
 
 <BookStore.Web.Client.Components.ModalWindow Show="@IsShowUpdateModal">
     <EditForm Model="book" OnValidSubmit="@UpdateSubmit">
         <DataAnnotationsValidator />
-        <table>
+        <div class="modal-header form-group without-padding">
+            <h5 class="modal-title">Book updating</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideUpdateWindow">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <table style="width:100%">
             <tbody>
                 <tr>
-                    <td style="padding-right:10px;">
+                    <td style="padding-right:10px; width:55%;">
                         <div class="form-group">
                             <label class="font-weight-bold">Name</label>
                             <InputText class="form-control" @bind-Value="book.Name" />
@@ -122,17 +146,13 @@
                             <ValidationMessage For="() => book.Price" />
                         </div>
                     </td>
-                    <td style="vertical-align:top;">
-                        <div class="form-group">
+                    <td style="vertical-align:top; width:45%;">
+                        <div>
                             <label class="font-weight-bold" style="width:100%">Picture</label>
-                            <div class="custom-file">
-                                <InputFile class="custom-file-input" OnChange="@OnInputFileChange" />
-                                <label class="custom-file-label" for="validatedCustomFile">Choose image...</label>
-                                <div class="invalid-feedback">Example invalid custom file feedback</div>
-                            </div>
-                            <div style="text-align:center; width:100%;">
-                                <img class="img-thumbnail" src="@book.Image" />
-                            </div>
+                        </div>
+                        <div class="form-group" style="text-align:center; width:100%; position:relative">
+                            <InputFile class="custom-file-input file-load-fill-container" OnChange="@OnInputFileChange" />
+                            <img class="img-thumbnail" src="@(string.IsNullOrEmpty(book.Image) ? "img/default.jpg" :book.Image)" />
                         </div>
                     </td>
                 </tr>
@@ -148,10 +168,16 @@
 <BookStore.Web.Client.Components.ModalWindow Show="@IsShowAddModal">
     <EditForm Model="book" OnValidSubmit="@AddSubmit">
         <DataAnnotationsValidator />
-        <table>
+        <div class="modal-header form-group without-padding">
+            <h5 class="modal-title">Book adding</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddWindow">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <table style="width:100%">
             <tbody>
                 <tr>
-                    <td style="padding-right:10px;">
+                    <td style="padding-right:10px; width:55%">
                         <div class="form-group">
                             <label class="font-weight-bold">Name</label>
                             <InputText class="form-control" @bind-Value="book.Name" />
@@ -178,17 +204,13 @@
                             <ValidationMessage For="() => book.Price" />
                         </div>
                     </td>
-                    <td style="vertical-align:top;">
-                        <div class="form-group">
+                    <td style="vertical-align:top; width:45%;">
+                        <div>
                             <label class="font-weight-bold" style="width:100%">Picture</label>
-                            <div class="custom-file">
-                                <InputFile class="custom-file-input" OnChange="@OnInputFileChange" />
-                                <label class="custom-file-label" for="validatedCustomFile">Choose image...</label>
-                                <div class="invalid-feedback">Example invalid custom file feedback</div>
-                            </div>
-                            <div style="text-align:center; width:100%;">
-                                <img class="img-thumbnail" src="@book.Image" />
-                            </div>
+                        </div>
+                        <div class="form-group" style="text-align:center; width:100%; position:relative">
+                            <InputFile class="custom-file-input file-load-fill-container" OnChange="@OnInputFileChange" />
+                            <img class="img-thumbnail" src="@(string.IsNullOrEmpty(book.Image) ? "img/default.jpg" :book.Image)" />
                         </div>
                     </td>
                 </tr>
@@ -209,6 +231,10 @@
 
 @code
 {
+    private int CurrentPageId { get; set; } = 0;
+    private int PageItemCount { get; set; } = 10;
+
+
     private Book book = new Book();
     private List<Book> books = new List<Book>();
     private DateTime ReleaseDate
@@ -237,7 +263,7 @@
 
         var resizedImageFile = await imageFile.RequestImageFileAsync(format, 240, 240);
         var buffer = new byte[resizedImageFile.Size];
-        await resizedImageFile.OpenReadStream().ReadAsync(buffer);
+        await resizedImageFile.OpenReadStream(maxAllowedSize: 20480000).ReadAsync(buffer);
         var imageDataUrl = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
         book.Image = imageDataUrl;
 
