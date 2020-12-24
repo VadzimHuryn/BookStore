@@ -7,10 +7,56 @@
 <table style="width:100%">
     <tbody>
         <tr>
-            <td style="padding-bottom:10px; padding-top:10px;"><button @onclick="ShowAddBookWindow" class="btn btn-primary">Add book</button></td>
+            <td colspan="2" style="padding-bottom:10px; padding-top:10px;">
+                <table style="width: 100%">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <button @onclick="ShowAddBookWindow" class="btn btn-primary">Add book</button>
+                            </td>
+                            <td>
+                                <nav aria-label="...">
+                                    <ul class="pagination">
+                                        <li class="page-item @(IsCardsShow ? "active" : "")" @onclick="() => { IsCardsShow = true; }">
+                                            <a class="page-link">Cards</a>
+                                        </li>
+                                        <li class="page-item @(!IsCardsShow ? "active" : "")" @onclick="() => { IsCardsShow = false; }">
+                                            <a class="page-link">Table</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </td>
+                            <td style="padding-bottom:10px; padding-top:10px; text-align:end; width:200px;">
+                                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @oninput="Search">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
         </tr>
         <tr>
-            <td>
+            <td hidden="@(!IsCardsShow)" colspan="2">
+                <div style="width:100%">
+                    @foreach (var book in books.Where(x => SearchBook(x)).Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
+                    {
+                        <div class="card" style="width: 18rem; float:left; margin-right:10px; margin-bottom:10px;">
+                            <div class="form-group">
+                                <div style="text-align:center; display: block; margin-top: 20px; margin-left: auto; margin-right: auto; height:250px;">
+                                    <img class="img-thumbnail" src="@(string.IsNullOrEmpty(book.Image) ? "img/default.jpg" :book.Image)" />
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" style="height: 48px;overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">@book.Name</h5>
+                                <p>Release date: @book.ReleaseDate.ToString("dd-MM-yyyy")</p>
+                                <p>Count: @book.Count</p>
+                                <p>Price: @book.Price</p>
+                                <button class="btn btn-outline-info" @onclick="() => ShowAndLoadDescriptionWindow(book.Id)">Details</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </td>
+            <td hidden="@(IsCardsShow)" colspan="2">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -22,7 +68,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var book in books.Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
+                        @foreach (var book in books.Where(x => SearchBook(x)).Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
                         {
                             <tr class="clickable-row" @onclick="() => ShowAndLoadDescriptionWindow(book.Id)">
                                 <td scope="row">@book.Id</td>
@@ -35,10 +81,11 @@
                     </tbody>
                 </table>
             </td>
+
         </tr>
         <tr>
-            <td>
-                <BookStore.Web.Client.Components.Pagination ItemsCount="@books.Count" @bind-CurrentPageId="CurrentPageId" @bind-PageItemCount="PageItemCount">
+            <td colspan="2">
+                <BookStore.Web.Client.Components.Pagination ItemsCount="@books.Where(x => SearchBook(x)).Count()" @bind-CurrentPageId="CurrentPageId" @bind-PageItemCount="PageItemCount">
 
                 </BookStore.Web.Client.Components.Pagination>
             </td>
@@ -231,10 +278,12 @@
 
 @code
 {
+    private bool IsCardsShow { get; set; } = true;
+
     private int CurrentPageId { get; set; } = 0;
     private int PageItemCount { get; set; } = 10;
 
-
+    private string SearchText { get; set; } = string.Empty;
     private Book book = new Book();
     private List<Book> books = new List<Book>();
     private DateTime ReleaseDate
@@ -398,5 +447,25 @@
         this.IsShowUpdateModal = false;
         this.IsShowDeleteModal = false;
         this.IsShowAddModal = false;
+    }
+
+    private bool SearchBook(Book book)
+    {
+        if (string.IsNullOrEmpty(SearchText))
+        {
+            return true;
+        }
+
+        return book.Id.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || book.Name.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || book.Price.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || book.Count.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || book.Description.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || book.ReleaseDate.ToString("dd-MM-yyyy").ToUpperInvariant().Contains(SearchText.ToUpperInvariant());
+    }
+
+    private void Search(ChangeEventArgs e)
+    {
+        SearchText = e.Value.ToString().Replace("'", string.Empty);
     }
 }

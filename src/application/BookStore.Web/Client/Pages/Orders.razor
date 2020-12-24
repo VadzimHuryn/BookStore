@@ -11,8 +11,19 @@
 <table style="width:100%">
     <tbody>
         <tr>
-            <td style="padding-bottom:10px; padding-top:10px;">
-                <button @onclick="ShowAddOrderWindow" class="btn btn-primary">Add order</button>
+            <td colspan="2" style="padding-bottom:10px; padding-top:10px;">
+                <table style="width: 100%">
+                    <tbody>
+                        <tr>
+                            <td style="padding-bottom:10px; padding-top:10px;">
+                                <button @onclick="ShowAddOrderWindow" class="btn btn-primary">Add order</button>
+                            </td>
+                            <td style="padding-bottom:10px; padding-top:10px; text-align:end; width:200px;">
+                                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @oninput="Search">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </td>
         </tr>
         <tr>
@@ -33,7 +44,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var localOrder in orders.Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
+                        @foreach (var localOrder in orders.Where(x => SearchOrder(x)).Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
                         {
                             <tr class="clickable-row" @onclick="() => ShowAndLoadDescriptionWindow(localOrder.Id)">
                                 <td scope="row">@localOrder.Id</td>
@@ -54,7 +65,7 @@
         </tr>
         <tr>
             <td>
-                <BookStore.Web.Client.Components.Pagination ItemsCount="@orders.Count" @bind-CurrentPageId="CurrentPageId" @bind-PageItemCount="PageItemCount">
+                <BookStore.Web.Client.Components.Pagination ItemsCount="@orders.Where(x => SearchOrder(x)).Count()" @bind-CurrentPageId="CurrentPageId" @bind-PageItemCount="PageItemCount">
                 </BookStore.Web.Client.Components.Pagination>
             </td>
         </tr>
@@ -87,7 +98,7 @@
             <button type="button" class="form-control btn btn-outline-primary" data-dismiss="modal" @onclick="ShowBooksWindows">Choose books</button>
         </div>
         <div class="form-group">
-            <b><b>Summary Price:</b> @books.Sum(x => (orderBooks.FirstOrDefault(y => y.BookId == x.Id)?.Count ?? 0) * x.Price)</b>
+            <b>Summary Price:</b> @books.Sum(x => (orderBooks.FirstOrDefault(y => y.BookId == x.Id)?.Count ?? 0) * x.Price)
         </div>
         <div class="form-group">
             <b>Buyer</b>
@@ -126,6 +137,19 @@
     <table style="width:100%">
         <tbody>
             <tr>
+                <td colspan="2" style="padding-bottom:10px; padding-top:10px;">
+                    <table style="width: 100%">
+                        <tbody>
+                            <tr>
+                                <td style="padding-bottom:10px; padding-top:10px; text-align:start; width:200px;">
+                                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @oninput="Search">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
                 <td>
                     <table class="table table-hover">
                         <thead>
@@ -139,7 +163,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var book in books.Skip(BookPageItemCount * BookCurrentPageId - 1).Take(BookPageItemCount))
+                            @foreach (var book in books.Where(x => SearchBook(x)).Skip(BookPageItemCount * BookCurrentPageId - 1).Take(BookPageItemCount))
                             {
                                 <tr class="clickable-row">
                                     <td scope="row">@book.Name</td>
@@ -170,7 +194,7 @@
             </tr>
             <tr>
                 <td>
-                    <BookStore.Web.Client.Components.Pagination ItemsCount="@books.Count" @bind-CurrentPageId="BookCurrentPageId" @bind-PageItemCount="BookPageItemCount" IsShow15ItemsButton="false">
+                    <BookStore.Web.Client.Components.Pagination ItemsCount="@books.Where(x => SearchBook(x)).Count()" @bind-CurrentPageId="BookCurrentPageId" @bind-PageItemCount="BookPageItemCount" IsShow15ItemsButton="false">
                     </BookStore.Web.Client.Components.Pagination>
                 </td>
             </tr>
@@ -316,6 +340,19 @@
     <table style="width:100%">
         <tbody>
             <tr>
+                <td colspan="2" style="padding-bottom:10px; padding-top:10px;">
+                    <table style="width: 100%">
+                        <tbody>
+                            <tr>
+                                <td style="padding-bottom:10px; padding-top:10px; text-align:start; width:200px;">
+                                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @oninput="Search">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
                 <td>
                     <table class="table table-hover">
                         <thead>
@@ -328,7 +365,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var user in buyers.Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
+                            @foreach (var user in buyers.Where(x => SearchUser(x)).Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
                             {
                                 <tr @onclick="() => ConfirmBuyers(user.Id)">
                                     <td scope="row">@user.UserId</td>
@@ -344,7 +381,7 @@
             </tr>
             <tr>
                 <td>
-                    <BookStore.Web.Client.Components.Pagination ItemsCount="@users.Where(x => userRoles.First(x => x.Code == "Buyer").Id == x.UserRoleId).Count()" @bind-CurrentPageId="BuyerCurrentPageId" @bind-PageItemCount="BuyerPageItemCount" IsShow15ItemsButton="false">
+                    <BookStore.Web.Client.Components.Pagination ItemsCount="@buyers.Where(x => SearchUser(x)).Count()" @bind-CurrentPageId="BuyerCurrentPageId" @bind-PageItemCount="BuyerPageItemCount" IsShow15ItemsButton="false">
                     </BookStore.Web.Client.Components.Pagination>
                 </td>
             </tr>
@@ -366,6 +403,19 @@
     <table style="width:100%">
         <tbody>
             <tr>
+                <td colspan="2" style="padding-bottom:10px; padding-top:10px;">
+                    <table style="width: 100%">
+                        <tbody>
+                            <tr>
+                                <td style="padding-bottom:10px; padding-top:10px; text-align:start; width:200px;">
+                                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @oninput="Search">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
                 <td>
                     <table class="table table-hover">
                         <thead>
@@ -378,7 +428,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var user in sellers.Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
+                            @foreach (var user in sellers.Where(x => SearchUser(x)).Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
                             {
                                 <tr @onclick="() => ConfirmSellers(user.Id)">
                                     <td scope="row">@user.UserId</td>
@@ -394,7 +444,7 @@
             </tr>
             <tr>
                 <td>
-                    <BookStore.Web.Client.Components.Pagination ItemsCount="@users.Where(x => userRoles.First(x => x.Code == "Seller").Id == x.UserRoleId).Count()" @bind-CurrentPageId="SellerCurrentPageId" @bind-PageItemCount="SellerPageItemCount" IsShow15ItemsButton="false">
+                    <BookStore.Web.Client.Components.Pagination ItemsCount="sellers.Where(x => SearchUser(x)).Count()" @bind-CurrentPageId="SellerCurrentPageId" @bind-PageItemCount="SellerPageItemCount" IsShow15ItemsButton="false">
                     </BookStore.Web.Client.Components.Pagination>
                 </td>
             </tr>
@@ -445,6 +495,7 @@
     private int BuyerPageItemCount { get; set; } = 10;
     private int SellerCurrentPageId { get; set; } = 0;
     private int SellerPageItemCount { get; set; } = 10;
+    private string SearchText { get; set; } = string.Empty;
 
     private bool IsOrderBooksChanged { get; set; }
 
@@ -483,21 +534,25 @@
 
     protected void ShowBuyers()
     {
+        SearchText = string.Empty;
         this.IsShowBuyers = true;
     }
 
     protected void HideBuyers()
     {
+        SearchText = string.Empty;
         this.IsShowBuyers = false;
     }
 
     protected void ShowSellers()
     {
+        SearchText = string.Empty;
         this.IsShowSellers = true;
     }
 
     protected void HideSellers()
     {
+        SearchText = string.Empty;
         this.IsShowSellers = false;
     }
 
@@ -525,11 +580,13 @@
 
     private void ShowBookTableWindow()
     {
+        SearchText = string.Empty;
         this.IsShowBooksTableModal = true;
     }
 
     private void HideBookTableWindow()
     {
+        SearchText = string.Empty;
         orderBooks = new List<OrderBook>();
         this.IsShowBooksTableModal = false;
         this.IsShowAddModal = true;
@@ -780,5 +837,59 @@
 
     #endregion
 
+    private bool SearchOrder(OrderShort order)
+    {
+        if (string.IsNullOrEmpty(SearchText))
+        {
+            return true;
+        }
+
+        return order.Id.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || order.Comment.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || order.BuyerName.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || order.BuyerEmail.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || order.BuyerPhoneNumber.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || order.SellerName.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || order.SummaryPrice.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || order.OrderDateTime.ToString("dd-MM-yyyy").ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || orderStatuses.FirstOrDefault(x => x.Id == order.OrderStatusId).Name.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || order.BooksCount.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant());
+
+    }
+
+    private bool SearchUser(User user)
+    {
+        if (string.IsNullOrEmpty(SearchText))
+        {
+            return true;
+        }
+
+        return user.Id.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || user.FirstName.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || user.LastName.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || user.Email.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || user.PhoneNumber.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || userRoles.FirstOrDefault(x => x.Id == user.UserRoleId).Name.ToUpperInvariant().Contains(SearchText.ToUpperInvariant());
+    }
+
+    private bool SearchBook(Book book)
+    {
+        if (string.IsNullOrEmpty(SearchText))
+        {
+            return true;
+        }
+
+        return book.Id.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || book.Name.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || book.Price.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || book.Count.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || book.Description.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || book.ReleaseDate.ToString("dd-MM-yyyy").ToUpperInvariant().Contains(SearchText.ToUpperInvariant());
+    }
+
+    private void Search(ChangeEventArgs e)
+    {
+        SearchText = e.Value.ToString().Replace("'", string.Empty);
+    }
 
 }

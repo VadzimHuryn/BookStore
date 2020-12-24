@@ -7,7 +7,20 @@
 <table style="width:100%">
     <tbody>
         <tr>
-            <td style="padding-bottom:10px; padding-top:10px;"><button @onclick="OpenAddWindow" class="btn btn-primary">Add user</button></td>
+            <td colspan="2" style="padding-bottom:10px; padding-top:10px;">
+                <table style="width: 100%">
+                    <tbody>
+                        <tr>
+                            <td style="padding-bottom:10px; padding-top:10px;">
+                                <button @onclick="OpenAddWindow" class="btn btn-primary">Add user</button>
+                            </td>
+                            <td style="padding-bottom:10px; padding-top:10px; text-align:end; width:200px;">
+                                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @oninput="Search">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
         </tr>
         <tr>
             <td>
@@ -19,18 +32,20 @@
                             <th scope="col">Last Name</th>
                             <th scope="col">Email</th>
                             <th scope="col">Phone Number</th>
+                            <th scope="col">User role</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var user in users.Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
+                        @foreach (var user in users.Where(x => SearchUser(x)).Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
                         {
-                            <tr>
-                                <td scope="row">@user.UserId</td>
-                                <td scope="row">@user.FirstName</td>
-                                <td scope="row">@user.LastName</td>
-                                <td scope="row">@user.Email</td>
-                                <td scope="row">@user.PhoneNumber</td>
-                            </tr>
+                        <tr>
+                            <td scope="row">@user.UserId</td>
+                            <td scope="row">@user.FirstName</td>
+                            <td scope="row">@user.LastName</td>
+                            <td scope="row">@user.Email</td>
+                            <td scope="row">@user.PhoneNumber</td>
+                            <td scope="row">@userRoles.FirstOrDefault(x => x.Id == user.UserRoleId).Name</td>
+                        </tr>
                         }
                     </tbody>
                 </table>
@@ -38,7 +53,7 @@
         </tr>
         <tr>
             <td>
-                <BookStore.Web.Client.Components.Pagination ItemsCount="@users.Count" @bind-CurrentPageId="CurrentPageId" @bind-PageItemCount="PageItemCount">
+                <BookStore.Web.Client.Components.Pagination ItemsCount="@users.Where(x => SearchUser(x)).Count()" @bind-CurrentPageId="CurrentPageId" @bind-PageItemCount="PageItemCount">
 
                 </BookStore.Web.Client.Components.Pagination>
             </td>
@@ -122,6 +137,7 @@
 
     private int CurrentPageId { get; set; } = 0;
     private int PageItemCount { get; set; } = 10;
+    private string SearchText { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -171,5 +187,25 @@
         await AddUser();
         await LoadUsers();
         this.OpenAddModal = false;
+    }
+
+    private bool SearchUser(User user)
+    {
+        if (string.IsNullOrEmpty(SearchText))
+        {
+            return true;
+        }
+
+        return user.Id.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || user.FirstName.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || user.LastName.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || user.Email.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || user.PhoneNumber.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || userRoles.FirstOrDefault(x => x.Id == user.UserRoleId).Name.ToUpperInvariant().Contains(SearchText.ToUpperInvariant());
+    }
+
+    private void Search(ChangeEventArgs e)
+    {
+        SearchText = e.Value.ToString().Replace("'", string.Empty);
     }
 }
