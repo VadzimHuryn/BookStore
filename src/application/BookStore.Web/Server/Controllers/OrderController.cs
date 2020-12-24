@@ -30,6 +30,20 @@ namespace BookStore.Web.Server.Controllers
             return _orderService.GetStatuses();
         }
 
+        [HttpGet]
+        [Route("{id}")]
+        public Order GetOrderById(int id)
+        {
+            return _orderService.GetOrderById(id);
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public void Delete(int id)
+        {
+            _orderService.Delete(id);
+        }
+
         [HttpPost]
         public int Add([FromBody] Order order)
         {

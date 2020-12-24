@@ -36,6 +36,11 @@ namespace BookStore.Repositories
 
         private string GET_ORDER_STATUSES = $@"SELECT * FROM [dbo].[OrderStatus]";
 
+        private string GET_ORDER_BOOKS_BY_ORDER_ID = $@"SELECT * FROM [dbo].[OrderBook]";
+
+        private string DELETE_ORDER = $@"DELETE FROM [dbo].[Order] WHERE [Id] = @Id";
+        private string DELETE_ORDER_BOOK = $@"DELETE FROM [dbo].[OrderBook] WHERE [OrderId] = @Id";
+
 
         public OrderRepository(string connectionString) : base(connectionString) { }
 
@@ -67,6 +72,22 @@ namespace BookStore.Repositories
         {
             Execute(UPDATE_ORDER, orderDto);
             var result = GetById(orderDto.Id);
+            return result;
+        }
+
+        public void Delete(int id)
+        {
+            Execute(DELETE_ORDER, new { Id = id });
+        }
+
+        public void DeleteOrderBook(int orderId)
+        {
+            Execute(DELETE_ORDER_BOOK, new { Id = orderId });
+        }
+
+        public List<OrderBookDto> GetOrderBooksByOrderId(int id)
+        {
+            var result = Query<OrderBookDto>(GET_ORDER_BOOKS_BY_ORDER_ID + $" WHERE [OrderId] = {id}");
             return result;
         }
 

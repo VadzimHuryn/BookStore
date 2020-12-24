@@ -7,6 +7,9 @@
 <table style="width:100%">
     <tbody>
         <tr>
+            <td style="padding-bottom:10px; padding-top:10px;"><button @onclick="OpenAddWindow" class="btn btn-primary">Add user</button></td>
+        </tr>
+        <tr>
             <td>
                 <table class="table table-hover">
                     <thead>
@@ -40,9 +43,6 @@
                 </BookStore.Web.Client.Components.Pagination>
             </td>
         </tr>
-        <tr>
-            <td><button @onclick="OpenAddWindow" class="btn btn-outline-secondary">Add user</button></td>
-        </tr>
     </tbody>
 </table>
 
@@ -62,14 +62,14 @@
             </button>
         </div>
         <div class="form-group">
-            <label>User Id</label>
+            <b>User Id</b>
             <InputText class="form-control" @bind-Value="user.UserId" @onfocusout="CheckUserId" />
             <span hidden="@(!UserWithUserIdExists)" class="validation-message">User with UserId @user?.UserId alredy exists</span>
             <ValidationMessage hidden="@UserWithUserIdExists" For="() => user.UserId" />
         </div>
 
         <div class="form-group">
-            <label>User Role</label>
+            <b>User Role</b>
             <select class="form-control" @bind="user.UserRoleId">
                 <option value="-1" selected>-- select user role --</option>
                 @foreach (var userRole in userRoles)
@@ -81,22 +81,22 @@
         </div>
 
         <div class="form-group">
-            <label>First Name</label>
+            <b>First Name</b>
             <InputText class="form-control" @bind-Value="user.FirstName" />
             <ValidationMessage For="() => user.FirstName" />
         </div>
         <div class="form-group">
-            <label>Last Name</label>
+            <b>Last Name</b>
             <InputText class="form-control" @bind-Value="user.LastName" />
             <ValidationMessage For="() => user.LastName" />
         </div>
         <div class="form-group">
-            <label>Email</label>
+            <b>Email</b>
             <InputText class="form-control" @bind-Value="user.Email" />
             <ValidationMessage For="() => user.Email" />
         </div>
         <div class="form-group">
-            <label>Phone number</label>
+            <b>Phone number</b>
             <InputText class="form-control" @bind-Value="user.PhoneNumber" />
             <ValidationMessage For="() => user.PhoneNumber" />
         </div>
@@ -136,7 +136,7 @@
     private void HideAddWindow()
     {
         user = new User();
-        this.OpenAddModal = true;
+        this.OpenAddModal = false;
     }
 
     private async Task LoadUsers()

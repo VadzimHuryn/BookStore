@@ -7,6 +7,9 @@
 <table style="width:100%">
     <tbody>
         <tr>
+            <td style="padding-bottom:10px; padding-top:10px;"><button @onclick="ShowAddBookWindow" class="btn btn-primary">Add book</button></td>
+        </tr>
+        <tr>
             <td>
                 <table class="table table-hover">
                     <thead>
@@ -39,9 +42,6 @@
 
                 </BookStore.Web.Client.Components.Pagination>
             </td>
-        </tr>
-        <tr>
-            <td><button @onclick="ShowAddBookWindow" class="btn btn-outline-secondary">Add book</button></td>
         </tr>
     </tbody>
 </table>
@@ -92,7 +92,7 @@
 </BookStore.Web.Client.Components.ModalWindow>
 
 <BookStore.Web.Client.Components.ModalWindow Show="@IsShowDeleteModal">
-    <div class="modal-header">
+    <div class="modal-header form-group without-padding">
         <h5 class="modal-title" id="exampleModalLabel">Delete book</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDeleteWindow">
             <span aria-hidden="true">&times;</span>
@@ -301,7 +301,7 @@
 
     protected void HideDeleteWindow()
     {
-        this.IsShowDescriptionModal = false;
+        this.IsShowDescriptionModal = true;
         this.IsShowUpdateModal = false;
         this.IsShowDeleteModal = false;
         this.IsShowAddModal = false;

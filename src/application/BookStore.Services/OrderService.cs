@@ -39,11 +39,32 @@ namespace BookStore.Services
                     BuyerPhoneNumber = orderShortDto.BuyerPhoneNumber,
                     OrderDateTime = orderShortDto.OrderDateTime,
                     OrderStatusId = orderShortDto.OrderStatusId,
-                    SummaryPrice = orderShortDto.OrderStatusId
+                    SummaryPrice = orderShortDto.SummaryPrice
                 });
             }
 
             return result;
+        }
+
+        public Order GetOrderById(int id)
+        {
+            var orderDto = _orderRepository.GetById(id);
+            var orderBooks = _orderRepository.GetOrderBooksByOrderId(orderDto.Id);
+
+            return new Order()
+            {
+                Id = orderDto.Id,
+                BuyerId = orderDto.BuyerId,
+                SellerId = orderDto.SellerId,
+                Comment = orderDto.Comment,
+                OrderDateTime = orderDto.OrderDateTime,
+                OrderStatusId = orderDto.OrderStatusId,
+                OrderBooks = orderBooks.Select(x => new OrderBook()
+                {
+                    BookId = x.BookId,
+                    Count = x.Count
+                }).ToList(),
+            };
         }
 
         public int Add(Order order)
@@ -59,7 +80,7 @@ namespace BookStore.Services
                 OrderDateTime = order.OrderDateTime,
                 OrderStatusId = order.OrderStatusId,
                 SellerId = order.SellerId,
-                SummaryPrice = orderBooks.Sum(x => x.Price)
+                SummaryPrice = orderBooks.Sum(x => x.Price * order.OrderBooks.FirstOrDefault(y => y.BookId == x.Id).Count)
             };
 
             var orderId = _orderRepository.Add(orderDto);
@@ -67,6 +88,11 @@ namespace BookStore.Services
             foreach(var orderBook in order.OrderBooks)
             {
                 _orderRepository.AddOrderBook(orderId, orderBook.BookId, orderBook.Count);
+
+                var goodDto = _goodRepository.GetGoodByBookId(orderBook.BookId);
+                goodDto.Count = goodDto.Count - orderBook.Count;
+
+                _goodRepository.UpdateGood(goodDto);
             }
 
             return orderId;
@@ -90,6 +116,28 @@ namespace BookStore.Services
             }
 
             return result;
+        }
+
+        public void Delete(int id)
+        {
+            var statuses = _orderRepository.GetStatuses();
+            var order = _orderRepository.GetById(id);
+            
+            if(order.OrderStatusId != statuses.FirstOrDefault(x => x.Code == "Paid").Id)
+            {
+                var orderBook = _orderRepository.GetOrderBooksByOrderId(order.Id);
+                var books = _bookRepository.GetAll().Where(x => orderBook.Any(y => y.BookId == x.Id)).ToList();
+
+                foreach(var book in books)
+                {
+                    var good = _goodRepository.GetGoodByBookId(book.Id);
+                    good.Count += orderBook.FirstOrDefault(x => x.BookId == good.BookId).Count;
+                    _goodRepository.UpdateGood(good);
+                }
+            }
+
+            _orderRepository.DeleteOrderBook(id);
+            _orderRepository.Delete(id);
         }
     }
 }

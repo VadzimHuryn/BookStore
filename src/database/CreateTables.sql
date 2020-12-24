@@ -168,14 +168,12 @@ ADD CONSTRAINT [FK_User_UserRoleId_UserRole_Id] FOREIGN KEY ([UserRoleId]) REFER
 GO
 
 INSERT INTO [UserRole] ([Code], [Name], [Comment])
-VALUES ('Administrator', 'Administrator', 'Administrator'),
-	   ('Seller', 'Seller', 'Seller'),
+VALUES ('Seller', 'Seller', 'Seller'),
 	   ('Buyer', 'Buyer', 'Buyer')
 
 INSERT INTO [OrderStatus] ([Code], [Name], [Comment])
 VALUES ('New', 'New', 'New'),
 	   ('Processed', 'Processed', 'Processed'),
 	   ('Paid', 'Paid', 'Paid'),
-	   ('Cancelled', 'Cancelled', 'Cancelled'),
-	   ('Delivered', 'Delivered', 'Delivered')
+	   ('Cancelled', 'Cancelled', 'Cancelled')
 
