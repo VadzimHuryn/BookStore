@@ -177,3 +177,24 @@ VALUES ('New', 'New', 'New'),
 	   ('Paid', 'Paid', 'Paid'),
 	   ('Cancelled', 'Cancelled', 'Cancelled')
 
+INSERT INTO [dbo].[User]
+           ([UserId]
+           ,[UserRoleId]
+           ,[FirstName]
+           ,[LastName]
+           ,[PhoneNumber]
+           ,[Password]
+           ,[Email]
+           ,[LastLoginDateTime]
+           ,[IsDisabled])
+     VALUES
+           ('admin'
+           ,'1'
+           ,'admin'
+           ,'admin'
+           ,'6666666'
+           ,'admin'
+           ,'admin@admin.com'
+           ,GETDATE()
+           ,0)
+
