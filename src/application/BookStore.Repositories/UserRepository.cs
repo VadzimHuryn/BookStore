@@ -32,7 +32,7 @@ namespace BookStore.Repositories
 
         public UserDto GetByUserId(string userId)
         {
-            var result = First<UserDto>($@"SELECT * FROM [dbo].[User] WHERE [UserId] = {userId}");
+            var result = First<UserDto>($@"SELECT * FROM [dbo].[User] WHERE [UserId] = '{userId}'");
             return result;
         }
 

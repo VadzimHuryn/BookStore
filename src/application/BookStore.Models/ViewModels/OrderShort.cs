@@ -15,5 +15,6 @@ namespace BookStore.Models.ViewModels
         public string BuyerEmail { get; set; }
         public string BuyerPhoneNumber { get; set; }
         public DateTime OrderDateTime { get; set; }
+        public int BuyerId { get; set; }
     }
 }

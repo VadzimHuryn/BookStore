@@ -12,7 +12,10 @@
                     <tbody>
                         <tr>
                             <td>
-                                <button @onclick="ShowAddBookWindow" class="btn btn-primary">Add book</button>
+                                @if (UserStaticInfo.IsSeller)
+                                {
+                                    <button @onclick="ShowAddBookWindow" class="btn btn-primary">Add book</button>
+                                }
                             </td>
                             <td>
                                 <nav aria-label="...">
@@ -132,8 +135,11 @@
         </tbody>
     </table>
     <div class="modal-footer">
-        <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteWindow">Delete</button>
-        <button type="button" class="btn btn-outline-secondary" @onclick="ShowUpdateWindow">Update</button>
+        @if (UserStaticInfo.IsSeller)
+        {
+            <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteWindow">Delete</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="ShowUpdateWindow">Update</button>
+        }
         <button type="button" class="btn btn-outline-secondary" @onclick="HideDescriptionWindow">Cancel</button>
     </div>
 </BookStore.Web.Client.Components.ModalWindow>

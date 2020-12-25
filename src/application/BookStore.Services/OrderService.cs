@@ -39,7 +39,8 @@ namespace BookStore.Services
                     BuyerPhoneNumber = orderShortDto.BuyerPhoneNumber,
                     OrderDateTime = orderShortDto.OrderDateTime,
                     OrderStatusId = orderShortDto.OrderStatusId,
-                    SummaryPrice = orderShortDto.SummaryPrice
+                    SummaryPrice = orderShortDto.SummaryPrice,
+                    BuyerId = orderShortDto.BuyerId
                 });
             }
 

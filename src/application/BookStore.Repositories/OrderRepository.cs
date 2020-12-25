@@ -16,7 +16,8 @@ namespace BookStore.Repositories
                                                    CONCAT([us].[FirstName], [us].[LastName]) AS SellerName,
                                             	   [ub].[Email] AS BuyerEmail,
                                             	   [ub].[PhoneNumber] AS BuyerPhoneNumber,
-                                            	   [o].[OrderDateTime] AS OrderDateTime
+                                            	   [o].[OrderDateTime] AS OrderDateTime,
+                                                   [ub].[Id] AS BuyerId
                                             FROM [dbo].[Order] [o]
                                             LEFT JOIN [dbo].[User] [ub] ON [o].[BuyerId] = [ub].[Id]
                                             LEFT JOIN [dbo].[User] [us] ON [o].[SellerId] = [us].[Id]";

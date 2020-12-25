@@ -75,5 +75,24 @@ namespace BookStore.Services
             return _userRepository.Add(dto);
         }
 
+        public User GetUserByUserLogin(UserLogin userLogin)
+        {
+            var userDto = _userRepository.GetByUserId(userLogin.UserId);
+
+            if (userDto == null)
+                return null;
+
+            return new User()
+            {
+                Id = userDto.Id,
+                UserId = userDto.UserId,
+                FirstName = userDto.FirstName,
+                LastName = userDto.LastName,
+                Email = userDto.Email,
+                PhoneNumber = userDto.PhoneNumber,
+                UserRoleId = userDto.UserRoleId
+            };
+        }
+
     }
 }

@@ -1,11 +1,85 @@
 ﻿@inherits LayoutComponentBase
+@inject HttpClient Http
 
-<div class="sidebar">
-    <NavMenu />
-</div>
+@if (UserStaticInfo.IsLogged)
+{
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+}
+
 
 <div class="main">
     <div class="content px-4">
-        @Body
+        @if (UserStaticInfo.IsLogged)
+        {
+            @Body
+        }
+        else
+        {
+            <div style="width:100vw;height: 90vh;display: flex;flex-wrap: wrap;align-content: center;">
+                <EditForm style="width:auto; height:auto; margin:auto" class="form-control" Model="userLogin" OnValidSubmit="Login">
+                    <DataAnnotationsValidator />
+                    <table style=" border-collapse: separate; border-spacing: 0 10px; ">
+                        <tbody>
+                            <tr style="margin-bottom:5px">
+                                <td style="text-align:end; padding:5px;"><b>UserId:</b></td>
+                                <InputText class="form-control" @bind-Value="userLogin.UserId"></InputText>
+                            </tr>
+                            <tr style="margin-bottom:5px">
+                                <td style="text-align:end; padding:5px;"><b>Password:</b></td>
+                                <InputText type="password" class="form-control" @bind-Value="userLogin.Password"></InputText>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input style="width:100%" type="submit" class="btn btn-primary" value="Log In" />
+                                </td>
+                            </tr>
+                            @if (IsShowErrorLogin)
+                            {
+                                <tr>
+                                    <td colspan="2">
+                                        <span style="color:red">Incorrect UserId or password</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </EditForm>
+            </div>
+        }
     </div>
 </div>
+
+
+
+@code{
+
+    public UserLogin userLogin = new UserLogin();
+
+    public bool IsShowErrorLogin { get; set; }
+
+    private async Task Login()
+    {
+        IsShowErrorLogin = false;
+
+        var result = await Http.PostAsJsonAsync("User/LogIn", userLogin);
+
+        var bytes = await result.Content.ReadAsByteArrayAsync();
+
+        if (bytes.Any())
+        {
+            var user = await result.Content.ReadFromJsonAsync<User>();
+            var userRoles = await Http.GetFromJsonAsync<List<UserRole>>("User/Roles");
+            IsShowErrorLogin = false;
+            UserStaticInfo.IsLogged = true;
+            UserStaticInfo.CurrentUser = user;
+            UserStaticInfo.IsSeller = userRoles.First(x => x.Code == "Seller").Id == user.UserRoleId;
+        }
+        else
+        {
+            UserStaticInfo.IsLogged = false;
+            IsShowErrorLogin = true;
+        }
+    }
+}

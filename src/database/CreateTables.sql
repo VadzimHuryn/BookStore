@@ -53,8 +53,8 @@ CREATE TABLE [Order]
 (
 	[Id] INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
 	[Comment] NVARCHAR(MAX),
-	[BuyerId] INT NULL,
-	[SellerId] INT NULL,
+	[BuyerId] INT NOT NULL,
+	[SellerId] INT NOT NULL,
 	[OrderDateTime] DATETIME NOT NULL DEFAULT(GETDATE()),
 	[SummaryPrice] DECIMAL(16,2) NOT NULL,
 	[OrderStatusId] INT NOT NULL,

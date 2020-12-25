@@ -37,5 +37,13 @@ namespace BookStore.Web.Server.Controllers
             var result = _userService.Add(user);
             return result;
         }
+
+        [HttpPost]
+        [Route("LogIn")]
+        public User CheckUser([FromBody] UserLogin userLogin)
+        {
+            return _userService.GetUserByUserLogin(userLogin);
+        }
+
     }
 }

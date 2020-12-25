@@ -8,8 +8,8 @@ namespace BookStore.Models.ViewModels
     public class Order : BaseModel
     {
         public string Comment { get; set; }
-        public int? BuyerId { get; set; }
-        public int? SellerId { get; set; }
+        public int BuyerId { get; set; }
+        public int SellerId { get; set; }
         public DateTime OrderDateTime { get; set; }
         public List<OrderBook> OrderBooks { get; set; }
         public int OrderStatusId { get; set; }
