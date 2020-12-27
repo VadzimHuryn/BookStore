@@ -1,0 +1,331 @@
+﻿
+@page "/Genres"
+@inject HttpClient Http
+
+<h3>Genres</h3>
+
+<table style="width:100%">
+    <tbody>
+        <tr>
+            <td colspan="2" style="padding-bottom:10px; padding-top:10px;">
+                <table style="width: 100%">
+                    <tbody>
+                        <tr>
+                            <td>
+                                @if (UserStaticInfo.IsSeller)
+                                {
+                                    <button @onclick="ShowAddWindow" class="btn btn-primary">Add genre</button>
+                                }
+                            </td>
+                            <td style="padding-bottom:10px; padding-top:10px; text-align:end; width:200px;">
+                                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @oninput="Search">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Id</th>
+                            <th scope="col">Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var genre in genres.Where(x => SearchGenre(x)).Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
+                        {
+                            <tr class="clickable-row" @onclick="() => ShowAndLoadDescriptionWindow(genre.Id)">
+                                <td scope="row">@genre.Id</td>
+                                <td scope="row">@genre.Name</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </td>
+
+        </tr>
+        <tr>
+            <td colspan="2">
+                <BookStore.Web.Client.Components.Pagination ItemsCount="@genres.Where(x => SearchGenre(x)).Count()" @bind-CurrentPageId="CurrentPageId" @bind-PageItemCount="PageItemCount">
+
+                </BookStore.Web.Client.Components.Pagination>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowDescriptionModal">
+
+    <div class="modal-header form-group without-padding">
+        <h5 class="modal-title">Genre description</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDescriptionWindow">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <table style="width:100%">
+        <tbody>
+            <tr>
+                <td style="padding-right:10px; width:55%;">
+                    <div>
+                        <p class="font-weight-bold">First name</p>
+                        <p class="text-justify font-weight-normal">@genre.Name</p>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="modal-footer">
+        @if (UserStaticInfo.IsSeller)
+        {
+            <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteWindow">Delete</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="ShowUpdateWindow">Update</button>
+        }
+        <button type="button" class="btn btn-outline-secondary" @onclick="HideDescriptionWindow">Cancel</button>
+    </div>
+</BookStore.Web.Client.Components.ModalWindow>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowDeleteModal">
+    <div class="modal-header form-group without-padding">
+        <h5 class="modal-title" id="exampleModalLabel">Delete genre</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDeleteWindow">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        The genre will be deleted from catalog.
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="HideDeleteWindow">Cancel</button>
+        <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteGenre(genre.Id)">Confirm</button>
+    </div>
+</BookStore.Web.Client.Components.ModalWindow>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowUpdateModal">
+    <EditForm Model="genre" OnValidSubmit="@UpdateSubmit">
+        <DataAnnotationsValidator />
+        <div class="modal-header form-group without-padding">
+            <h5 class="modal-title">Genre updating</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideUpdateWindow">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <table style="width:100%">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Name</label>
+                            <InputText class="form-control" @bind-Value="genre.Name" />
+                            <ValidationMessage For="() => genre.Name" />
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Confirm</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="HideUpdateWindow">Cancel</button>
+        </div>
+    </EditForm>
+</BookStore.Web.Client.Components.ModalWindow>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowAddModal">
+    <EditForm Model="genre" OnValidSubmit="@AddSubmit">
+        <DataAnnotationsValidator />
+        <div class="modal-header form-group without-padding">
+            <h5 class="modal-title">Genre adding</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddWindow">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <table style="width:100%">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Name</label>
+                            <InputText class="form-control" @bind-Value="genre.Name" />
+                            <ValidationMessage For="() => genre.Name" />
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Add</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="HideAddWindow">Cancel</button>
+        </div>
+    </EditForm>
+</BookStore.Web.Client.Components.ModalWindow>
+
+<BookStore.Web.Client.Components.LoadWindow Show="IsShowLoadWindow">
+
+</BookStore.Web.Client.Components.LoadWindow>
+
+
+
+@code
+{
+    private int CurrentPageId { get; set; } = 0;
+    private int PageItemCount { get; set; } = 10;
+
+    private string SearchText { get; set; } = string.Empty;
+    private Genre genre = new Genre();
+    private List<Genre> genres = new List<Genre>();
+
+    private bool IsShowAddModal { get; set; }
+    private bool IsShowDeleteModal { get; set; }
+    private bool IsShowDescriptionModal { get; set; }
+    private bool IsShowUpdateModal { get; set; }
+    private bool IsShowLoadWindow { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGenres();
+    }
+
+    protected void ShowAddWindow()
+    {
+        genre = new Genre();
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = true;
+    }
+
+    protected void HideAddWindow()
+    {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    protected void ShowDeleteWindow()
+    {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = true;
+        this.IsShowAddModal = false;
+    }
+
+    protected void HideDeleteWindow()
+    {
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    protected async Task ShowAndLoadDescriptionWindow(int id)
+    {
+        await LoadGenreById(id);
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private void HideDescriptionWindow()
+    {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private void HideUpdateWindow()
+    {
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private void ShowUpdateWindow()
+    {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = true;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+    private async Task LoadGenres()
+    {
+        IsShowLoadWindow = true;
+        genres = await Http.GetFromJsonAsync<List<Genre>>("Genre");
+        IsShowLoadWindow = false;
+    }
+
+    private async Task LoadGenreById(int id)
+    {
+        genre = await Http.GetFromJsonAsync<Genre>($"Genre/{id}");
+    }
+
+    private async Task AddGenre()
+    {
+        await Http.PostAsJsonAsync("Genre", genre);
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private async Task UpdateGenre()
+    {
+        var result = await Http.PutAsJsonAsync("Genre", genre);
+        genre = await result.Content.ReadFromJsonAsync<Genre>();
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private async Task DeleteGenre(int id)
+    {
+        await Http.DeleteAsync($"Genre/{id}");
+        await LoadGenres();
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    protected async Task AddSubmit()
+    {
+        await AddGenre();
+        await LoadGenres();
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    protected async Task UpdateSubmit()
+    {
+        await UpdateGenre();
+        await LoadGenres();
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private bool SearchGenre(Genre genre)
+    {
+        if (string.IsNullOrEmpty(SearchText))
+        {
+            return true;
+        }
+
+        return genre.Id.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || genre.Name.ToUpperInvariant().Contains(SearchText.ToUpperInvariant());
+    }
+
+    private void Search(ChangeEventArgs e)
+    {
+        SearchText = e.Value.ToString().Replace("'", string.Empty);
+    }
+}

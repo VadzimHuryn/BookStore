@@ -1,0 +1,346 @@
+﻿
+@page "/Authors"
+@inject HttpClient Http
+
+<h3>Authors</h3>
+
+<table style="width:100%">
+    <tbody>
+        <tr>
+            <td colspan="2" style="padding-bottom:10px; padding-top:10px;">
+                <table style="width: 100%">
+                    <tbody>
+                        <tr>
+                            <td>
+                                @if (UserStaticInfo.IsSeller)
+                                {
+                                    <button @onclick="ShowAddWindow" class="btn btn-primary">Add author</button>
+                                }
+                            </td>
+                            <td style="padding-bottom:10px; padding-top:10px; text-align:end; width:200px;">
+                                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @oninput="Search">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Id</th>
+                            <th scope="col">First name</th>
+                            <th scope="col">Last name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var author in authors.Where(x => SearchAuthor(x)).Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
+                        {
+                            <tr class="clickable-row" @onclick="() => ShowAndLoadDescriptionWindow(author.Id)">
+                                <td scope="row">@author.Id</td>
+                                <td scope="row">@author.FirstName</td>
+                                <td scope="row">@author.LastName</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </td>
+
+        </tr>
+        <tr>
+            <td colspan="2">
+                <BookStore.Web.Client.Components.Pagination ItemsCount="@authors.Where(x => SearchAuthor(x)).Count()" @bind-CurrentPageId="CurrentPageId" @bind-PageItemCount="PageItemCount">
+
+                </BookStore.Web.Client.Components.Pagination>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowDescriptionModal">
+
+    <div class="modal-header form-group without-padding">
+        <h5 class="modal-title">Author description</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDescriptionWindow">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <table style="width:100%">
+        <tbody>
+            <tr>
+                <td style="padding-right:10px; width:55%;">
+                    <div>
+                        <p class="font-weight-bold">First name</p>
+                        <p class="text-justify font-weight-normal">@author.FirstName</p>
+                        <p class="font-weight-bold">Last name</p>
+                        <p class="text-justify font-weight-normal">@author.LastName</p>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="modal-footer">
+        @if (UserStaticInfo.IsSeller)
+        {
+            <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteWindow">Delete</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="ShowUpdateWindow">Update</button>
+        }
+        <button type="button" class="btn btn-outline-secondary" @onclick="HideDescriptionWindow">Cancel</button>
+    </div>
+</BookStore.Web.Client.Components.ModalWindow>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowDeleteModal">
+    <div class="modal-header form-group without-padding">
+        <h5 class="modal-title" id="exampleModalLabel">Delete author</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDeleteWindow">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        The author will be deleted from catalog.
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="HideDeleteWindow">Cancel</button>
+        <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteAuthor(author.Id)">Confirm</button>
+    </div>
+</BookStore.Web.Client.Components.ModalWindow>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowUpdateModal">
+    <EditForm Model="author" OnValidSubmit="@UpdateSubmit">
+        <DataAnnotationsValidator />
+        <div class="modal-header form-group without-padding">
+            <h5 class="modal-title">Author updating</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideUpdateWindow">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <table style="width:100%">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="form-group">
+                            <label class="font-weight-bold">First name</label>
+                            <InputText class="form-control" @bind-Value="author.FirstName" />
+                            <ValidationMessage For="() => author.FirstName" />
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Last name</label>
+                            <InputText class="form-control" @bind-Value="author.LastName" />
+                            <ValidationMessage For="() => author.LastName" />
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Confirm</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="HideUpdateWindow">Cancel</button>
+        </div>
+    </EditForm>
+</BookStore.Web.Client.Components.ModalWindow>
+
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowAddModal">
+    <EditForm Model="author" OnValidSubmit="@AddSubmit">
+        <DataAnnotationsValidator />
+        <div class="modal-header form-group without-padding">
+            <h5 class="modal-title">Author adding</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddWindow">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <table style="width:100%">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="form-group">
+                            <label class="font-weight-bold">First name</label>
+                            <InputText class="form-control" @bind-Value="author.FirstName" />
+                            <ValidationMessage For="() => author.FirstName" />
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Last name</label>
+                            <InputText class="form-control" @bind-Value="author.LastName" />
+                            <ValidationMessage For="() => author.LastName" />
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Add</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="HideAddWindow">Cancel</button>
+        </div>
+    </EditForm>
+</BookStore.Web.Client.Components.ModalWindow>
+
+<BookStore.Web.Client.Components.LoadWindow Show="IsShowLoadWindow">
+
+</BookStore.Web.Client.Components.LoadWindow>
+
+
+
+@code
+{
+    private int CurrentPageId { get; set; } = 0;
+    private int PageItemCount { get; set; } = 10;
+
+    private string SearchText { get; set; } = string.Empty;
+    private Author author = new Author();
+    private List<Author> authors = new List<Author>();
+
+    private bool IsShowAddModal { get; set; }
+    private bool IsShowDeleteModal { get; set; }
+    private bool IsShowDescriptionModal { get; set; }
+    private bool IsShowUpdateModal { get; set; }
+    private bool IsShowLoadWindow { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAuthors();
+    }
+
+    protected void ShowAddWindow()
+    {
+        author = new Author();
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = true;
+    }
+
+    protected void HideAddWindow()
+    {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    protected void ShowDeleteWindow()
+    {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = true;
+        this.IsShowAddModal = false;
+    }
+
+    protected void HideDeleteWindow()
+    {
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    protected async Task ShowAndLoadDescriptionWindow(int id)
+    {
+        await LoadAuthorById(id);
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private void HideDescriptionWindow()
+    {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private void HideUpdateWindow()
+    {
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private void ShowUpdateWindow()
+    {
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = true;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+    private async Task LoadAuthors()
+    {
+        IsShowLoadWindow = true;
+        authors = await Http.GetFromJsonAsync<List<Author>>("Author");
+        IsShowLoadWindow = false;
+    }
+
+    private async Task LoadAuthorById(int id)
+    {
+        author = await Http.GetFromJsonAsync<Author>($"Author/{id}");
+    }
+
+    private async Task AddAuthor()
+    {
+        await Http.PostAsJsonAsync("Author", author);
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private async Task UpdateAuthor()
+    {
+        var result = await Http.PutAsJsonAsync("Author", author);
+        author = await result.Content.ReadFromJsonAsync<Author>();
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private async Task DeleteAuthor(int id)
+    {
+        await Http.DeleteAsync($"Author/{id}");
+        await LoadAuthors();
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    protected async Task AddSubmit()
+    {
+        await AddAuthor();
+        await LoadAuthors();
+        this.IsShowDescriptionModal = false;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    protected async Task UpdateSubmit()
+    {
+        await UpdateAuthor();
+        await LoadAuthors();
+        this.IsShowDescriptionModal = true;
+        this.IsShowUpdateModal = false;
+        this.IsShowDeleteModal = false;
+        this.IsShowAddModal = false;
+    }
+
+    private bool SearchAuthor(Author author)
+    {
+        if (string.IsNullOrEmpty(SearchText))
+        {
+            return true;
+        }
+
+        return author.Id.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || author.FirstName.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || author.LastName.ToUpperInvariant().Contains(SearchText.ToUpperInvariant());
+    }
+
+    private void Search(ChangeEventArgs e)
+    {
+        SearchText = e.Value.ToString().Replace("'", string.Empty);
+    }
+}

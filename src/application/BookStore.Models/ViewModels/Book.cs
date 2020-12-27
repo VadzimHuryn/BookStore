@@ -23,5 +23,7 @@ namespace BookStore.Models.ViewModels
         [Range(0, int.MaxValue, ErrorMessage = "Invalid price")]
         public decimal Price { get; set; }
         public string Image { get; set; }
+        public List<int> AuthorIds { get; set; }
+        public List<int> GenreIds { get; set; }
     }
 }
