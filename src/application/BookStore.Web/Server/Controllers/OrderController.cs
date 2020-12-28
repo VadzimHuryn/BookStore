@@ -49,5 +49,13 @@ namespace BookStore.Web.Server.Controllers
         {
             return _orderService.Add(order);
         }
+
+        [HttpPut]
+        public void UpdateStatus([FromBody] Order order)
+        {
+            _orderService.UpdateStatus(order);
+        }
+
     }
+
 }

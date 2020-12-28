@@ -54,8 +54,8 @@ namespace BookStore.Services
         public Book GetById(int id)
         {
             var bookDto = _bookRepository.GetById(id);
-            var bookAuthorDtos = _authorRepository.GetAllBookAuthorsByBookId(bookDto.Id);
-            var bookGenreDtos = _genreRepository.GetBookGenresByBookId(bookDto.Id);
+            var bookAuthorDtos = _authorRepository.GetAllBookAuthorsByBookId(id);
+            var bookGenreDtos = _genreRepository.GetBookGenresByBookId(id);
 
             return new Book()
             {
@@ -67,7 +67,7 @@ namespace BookStore.Services
                 Price = bookDto.Price,
                 Count = bookDto.Count,
                 AuthorIds = bookAuthorDtos.Select(x => x.AuthorId).ToList(),
-                GenreIds = bookGenreDtos.Select(x => x.BookId).ToList()
+                GenreIds = bookGenreDtos.Select(x => x.GenreId).ToList()
             };
         }
 
@@ -133,8 +133,8 @@ namespace BookStore.Services
             _goodRepository.UpdateGood(goodDto);
             var bookResult = _bookRepository.Update(bookDto);
 
-            _authorRepository.DeleteBookAuthorByBookId(bookResult.Id);
-            _genreRepository.DeleteBookGenreByBookId(bookResult.Id);
+            _authorRepository.DeleteBookAuthorByBookId(book.Id);
+            _genreRepository.DeleteBookGenreByBookId(book.Id);
 
             book.AuthorIds.ForEach(authorId =>
             {

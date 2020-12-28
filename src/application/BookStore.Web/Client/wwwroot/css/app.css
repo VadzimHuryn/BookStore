@@ -260,3 +260,7 @@ app {
     padding-right:0;
     padding-top:0;
 }
+
+.tr-selected{
+    background-color:cadetblue;
+}

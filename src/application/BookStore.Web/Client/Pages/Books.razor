@@ -130,6 +130,12 @@
                             <img class="img-thumbnail" src="@(string.IsNullOrEmpty(book.Image) ? "img/default.jpg" :book.Image)" />
                         </div>
                     </div>
+                    <div>
+                        <p class="font-weight-bold">Authors</p>
+                        <p style="height: 48px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">@string.Concat(authors.Where(x => book.AuthorIds.Contains(x.Id)).Select(x => $"{x.FirstName} {x.LastName}; "))</p>
+                        <p class="font-weight-bold">Genres</p>
+                        <p style="height: 48px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">@string.Concat(genres.Where(x => book.GenreIds.Contains(x.Id)).Select(x => $"{x.Name}; "))</p>
+                    </div>
                 </td>
             </tr>
         </tbody>
@@ -207,6 +213,14 @@
                             <InputFile class="custom-file-input file-load-fill-container" OnChange="@OnInputFileChange" />
                             <img class="img-thumbnail" src="@(string.IsNullOrEmpty(book.Image) ? "img/default.jpg" :book.Image)" />
                         </div>
+                        <div class="form-group">
+                            <button type="button" class="form-control btn btn-outline-primary" data-dismiss="modal" @onclick="ShowAuthorWindow">Choose authors</button>
+                            <p style="height: 48px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"><b>Authors: </b>@string.Concat(authors.Where(x => bookAuthors.Any(y => y.AuthorId == x.Id)).Select(x => $"{x.FirstName} {x.LastName}; "))</p>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="form-control btn btn-outline-primary" data-dismiss="modal" @onclick="ShowGenreWindow">Choose genres</button>
+                            <p style="height: 48px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"><b>Genres: </b>@string.Concat(genres.Where(x => bookGenres.Any(y => y.GenreId == x.Id)).Select(x => $"{x.Name}; "))</p>
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -230,7 +244,7 @@
         <table style="width:100%">
             <tbody>
                 <tr>
-                    <td style="padding-right:10px; width:55%">
+                    <td style="padding-right:10px; width:55%; max-width:5px">
                         <div class="form-group">
                             <label class="font-weight-bold">Name</label>
                             <InputText class="form-control" @bind-Value="book.Name" />
@@ -265,6 +279,14 @@
                             <InputFile class="custom-file-input file-load-fill-container" OnChange="@OnInputFileChange" />
                             <img class="img-thumbnail" src="@(string.IsNullOrEmpty(book.Image) ? "img/default.jpg" :book.Image)" />
                         </div>
+                        <div class="form-group">
+                            <button type="button" class="form-control btn btn-outline-primary" data-dismiss="modal" @onclick="ShowAuthorWindow">Choose authors</button>
+                            <p style="height: 48px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"><b>Authors: </b>@string.Concat(authors.Where(x => bookAuthors.Any(y => y.AuthorId == x.Id)).Select(x => $"{x.FirstName} {x.LastName}; "))</p>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="form-control btn btn-outline-primary" data-dismiss="modal" @onclick="ShowGenreWindow">Choose genres</button>
+                            <p style="height: 48px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"><b>Genres: </b>@string.Concat(genres.Where(x => bookGenres.Any(y => y.GenreId == x.Id)).Select(x => $"{x.Name}; "))</p>
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -275,6 +297,125 @@
         </div>
     </EditForm>
 </BookStore.Web.Client.Components.ModalWindow>
+
+
+@*AUTHOR WINDOW*@
+<BookStore.Web.Client.Components.WideModalWindow Show="IsShowAuthorWindos">
+    <div class="modal-header form-group without-padding">
+        <h5 class="modal-title">Available authors</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAuthorWindow">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <table style="width:100%">
+        <tbody>
+            <tr>
+                <td colspan="2" style="padding-bottom:10px; padding-top:10px;">
+                    <table style="width: 100%">
+                        <tbody>
+                            <tr>
+                                <td style="padding-bottom:10px; padding-top:10px; text-align:start; width:200px;">
+                                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @oninput="Search">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Id</th>
+                                <th scope="col">First name</th>
+                                <th scope="col">last Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var author in authors.Where(x => SearchAuthor(x)).Skip(AuthorPageItemCount * AuthorCurrentPageId - 1).Take(AuthorPageItemCount))
+                            {
+                                <tr class="@(bookAuthors.Any(x => x.AuthorId == author.Id) ? "tr-selected" : "")" @onclick="() => ClickAuthorToBook(author.Id)">
+                                    <td scope="row">@author.Id</td>
+                                    <td scope="row">@author.FirstName</td>
+                                    <td scope="row">@author.LastName</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <BookStore.Web.Client.Components.Pagination ItemsCount="@authors.Where(x => SearchAuthor(x)).Count()" @bind-CurrentPageId="AuthorCurrentPageId" @bind-PageItemCount="AuthorPageItemCount" IsShow15ItemsButton="false">
+                    </BookStore.Web.Client.Components.Pagination>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-primary" @onclick="ConfirmAuthor">Confirm</button>
+        <button type="button" class="btn btn-outline-secondary" @onclick="HideAuthorWindow">Cancel</button>
+    </div>
+</BookStore.Web.Client.Components.WideModalWindow>
+
+@*GENRE WINDOW*@
+<BookStore.Web.Client.Components.WideModalWindow Show="IsShowGenreWindow">
+    <div class="modal-header form-group without-padding">
+        <h5 class="modal-title">Available genres</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideGenreWindow">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <table style="width:100%">
+        <tbody>
+            <tr>
+                <td colspan="2" style="padding-bottom:10px; padding-top:10px;">
+                    <table style="width: 100%">
+                        <tbody>
+                            <tr>
+                                <td style="padding-bottom:10px; padding-top:10px; text-align:start; width:200px;">
+                                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @oninput="Search">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Id</th>
+                                <th scope="col">Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var genre in genres.Where(x => SearchGenre(x)).Skip(GenrePageItemCount * GenreCurrentPageId - 1).Take(GenrePageItemCount))
+                            {
+                                <tr class="@(bookGenres.Any(x => x.GenreId == genre.Id ) ? "tr-selected" : "")" @onclick="() => ClickGenreToBook(genre.Id)">
+                                    <td scope="row">@genre.Id</td>
+                                    <td scope="row">@genre.Name</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <BookStore.Web.Client.Components.Pagination ItemsCount="@genres.Where(x => SearchGenre(x)).Count()" @bind-CurrentPageId="GenreCurrentPageId" @bind-PageItemCount="GenrePageItemCount" IsShow15ItemsButton="false">
+                    </BookStore.Web.Client.Components.Pagination>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-primary" @onclick="ConfirmGenre">Confirm</button>
+        <button type="button" class="btn btn-outline-secondary" @onclick="HideGenreWindow">Cancel</button>
+    </div>
+</BookStore.Web.Client.Components.WideModalWindow>
 
 <BookStore.Web.Client.Components.LoadWindow Show="IsShowLoadWindow">
 
@@ -289,9 +430,21 @@
     private int CurrentPageId { get; set; } = 0;
     private int PageItemCount { get; set; } = 10;
 
+    private int AuthorCurrentPageId { get; set; } = 0;
+    private int AuthorPageItemCount { get; set; } = 10;
+
+    private int GenreCurrentPageId { get; set; } = 0;
+    private int GenrePageItemCount { get; set; } = 10;
+
     private string SearchText { get; set; } = string.Empty;
     private Book book = new Book();
     private List<Book> books = new List<Book>();
+    private List<Author> authors = new List<Author>();
+    private List<Genre> genres = new List<Genre>();
+
+    private List<BookAuthor> bookAuthors = new List<BookAuthor>();
+    private List<BookGenre> bookGenres = new List<BookGenre>();
+
     private DateTime ReleaseDate
     {
         get
@@ -306,6 +459,8 @@
     private bool IsShowDescriptionModal { get; set; }
     private bool IsShowUpdateModal { get; set; }
     private bool IsShowLoadWindow { get; set; }
+    private bool IsShowAuthorWindos { get; set; }
+    private bool IsShowGenreWindow { get; set; }
 
 
     private IList<string> imageDataUrls = new List<string>();
@@ -329,17 +484,92 @@
         await LoadBooks();
     }
 
+    private void ClickAuthorToBook(int id)
+    {
+        var bookAuthor = bookAuthors.FirstOrDefault(x => x.AuthorId == id);
+
+        if (bookAuthor != null)
+        {
+            bookAuthors.Remove(bookAuthor);
+        }
+        else
+        {
+            bookAuthors.Add(new BookAuthor()
+            {
+                AuthorId = id
+            });
+        }
+    }
+
+    private void ClickGenreToBook(int id)
+    {
+        var bookGenre = bookGenres.FirstOrDefault(x => x.GenreId == id);
+
+        if (bookGenre != null)
+        {
+            bookGenres.Remove(bookGenre);
+        }
+        else
+        {
+            bookGenres.Add(new BookGenre()
+            {
+                GenreId = id
+            });
+        }
+    }
+
+    private void ConfirmAuthor()
+    {
+        this.IsShowAuthorWindos = false;
+    }
+
+    private void ConfirmGenre()
+    {
+        this.IsShowGenreWindow = false;
+    }
+
+
+    private void ShowAuthorWindow()
+    {
+        this.IsShowAuthorWindos = true;
+    }
+
+    private void HideAuthorWindow()
+    {
+        SearchText = string.Empty;
+
+        this.IsShowAuthorWindos = false;
+    }
+
+    private void ShowGenreWindow()
+    {
+        this.IsShowGenreWindow = true;
+    }
+
+    private void HideGenreWindow()
+    {
+        SearchText = string.Empty;
+
+        this.IsShowGenreWindow = false;
+    }
+
     protected void ShowAddBookWindow()
     {
         book = new Book();
+        bookGenres = new List<BookGenre>();
+        bookAuthors = new List<BookAuthor>();
         this.IsShowDescriptionModal = false;
         this.IsShowUpdateModal = false;
         this.IsShowDeleteModal = false;
         this.IsShowAddModal = true;
     }
 
+
     protected void HideAddWindow()
     {
+        book = new Book();
+        bookAuthors = new List<BookAuthor>();
+        bookGenres = new List<BookGenre>();
         this.IsShowDescriptionModal = false;
         this.IsShowUpdateModal = false;
         this.IsShowDeleteModal = false;
@@ -389,6 +619,9 @@
 
     private void ShowUpdateWindow()
     {
+        bookGenres = book.GenreIds.Select(x => new BookGenre() { GenreId = x }).ToList();
+        bookAuthors = book.AuthorIds.Select(x => new BookAuthor() { AuthorId = x }).ToList();
+
         this.IsShowDescriptionModal = false;
         this.IsShowUpdateModal = true;
         this.IsShowDeleteModal = false;
@@ -398,16 +631,22 @@
     {
         IsShowLoadWindow = true;
         books = await Http.GetFromJsonAsync<List<Book>>("Book");
+        authors = await Http.GetFromJsonAsync<List<Author>>("Author");
+        genres = await Http.GetFromJsonAsync<List<Genre>>("Genre");
         IsShowLoadWindow = false;
     }
 
     private async Task LoadBookById(int id)
     {
         book = await Http.GetFromJsonAsync<Book>($"Book/{id}");
+        bookGenres = book.GenreIds.Select(x => new BookGenre() { GenreId = x }).ToList();
+        bookAuthors = book.AuthorIds.Select(x => new BookAuthor() { AuthorId = x }).ToList();
     }
 
     private async Task AddBook()
     {
+        book.AuthorIds = bookAuthors.Select(x => x.AuthorId).ToList();
+        book.GenreIds = bookGenres.Select(x => x.GenreId).ToList();
         await Http.PostAsJsonAsync("Book", book);
         this.IsShowDescriptionModal = false;
         this.IsShowUpdateModal = false;
@@ -417,6 +656,8 @@
 
     private async Task UpdateBook()
     {
+        book.AuthorIds = bookAuthors.Select(x => x.AuthorId).ToList();
+        book.GenreIds = bookGenres.Select(x => x.GenreId).ToList();
         var result = await Http.PutAsJsonAsync("Book", book);
         book = await result.Content.ReadFromJsonAsync<Book>();
         this.IsShowDescriptionModal = true;
@@ -468,6 +709,29 @@
             || book.Count.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
             || book.Description.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
             || book.ReleaseDate.ToString("dd-MM-yyyy").ToUpperInvariant().Contains(SearchText.ToUpperInvariant());
+    }
+
+    private bool SearchAuthor(Author author)
+    {
+        if (string.IsNullOrEmpty(SearchText))
+        {
+            return true;
+        }
+
+        return author.Id.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || author.FirstName.ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || author.LastName.ToUpperInvariant().Contains(SearchText.ToUpperInvariant());
+    }
+
+    private bool SearchGenre(Genre genre)
+    {
+        if (string.IsNullOrEmpty(SearchText))
+        {
+            return true;
+        }
+
+        return genre.Id.ToString().ToUpperInvariant().Contains(SearchText.ToUpperInvariant())
+            || genre.Name.ToUpperInvariant().Contains(SearchText.ToUpperInvariant());
     }
 
     private void Search(ChangeEventArgs e)

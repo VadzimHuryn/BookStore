@@ -99,6 +99,15 @@ namespace BookStore.Services
             return orderId;
         }
 
+        public void UpdateStatus(Order order)
+        {
+            var currentOrderDto = _orderRepository.GetById(order.Id);
+
+            currentOrderDto.OrderStatusId = order.OrderStatusId;
+
+            _orderRepository.Update(currentOrderDto);
+        }
+
         public List<OrderStatus> GetStatuses()
         {
             var result = new List<OrderStatus>();

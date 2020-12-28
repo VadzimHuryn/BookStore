@@ -108,21 +108,6 @@
             <b>Buyer</b>
             <button type="button" class="form-control btn btn-outline-primary" data-dismiss="modal" @onclick="ShowBuyers">@(string.IsNullOrEmpty(buyer.FirstName + buyer.LastName) ? "Choose buyer" : string.Format("{0} {1}", buyer.FirstName, buyer.LastName))</button>
         </div>
-        @*<div class="form-group">
-                <b>Seller</b>
-                <button type="button" class="form-control btn btn-outline-primary" data-dismiss="modal" @onclick="ShowSellers">@(string.IsNullOrEmpty(seller.FirstName + seller.LastName) ? "Choose seller" : string.Format("{0} {1}", seller.FirstName, seller.LastName))</button>
-            </div>*@
-        <div class="form-group">
-            <b>Order status</b>
-            <select class="form-control" @bind="order.OrderStatusId">
-                <option selected>-- select status --</option>
-                @foreach (var orderStatus in orderStatuses)
-                {
-                    <option value="@orderStatus.Id">@orderStatus.Name</option>
-                }
-            </select>
-            <ValidationMessage For="() => order.OrderStatusId" />
-        </div>
         <div class="modal-footer">
             <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Confirm</button>
             <button type="button" class="btn btn-outline-secondary" @onclick="HideAddWindow">Cancel</button>
@@ -321,6 +306,26 @@
                                     </table>
                                 </td>
                             </tr>
+                            <tr>
+                                <td style="text-align:end"><b>Order status:</b></td>
+                                @if (UserStaticInfo.IsSeller)
+                                {
+                                    <td>
+                                        <div style="margin-top:10px; margin-bottom:10px;">
+                                            <select class="form-control" @bind="order.OrderStatusId">
+                                                @foreach (var orderStatus in orderStatuses)
+                                                {
+                                                    <option value="@orderStatus.Id" selected="@(order.OrderStatusId == orderStatus.Id ? "selected" : string.Empty)">@orderStatus.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td style="text-align:start">@orderStatuses.FirstOrDefault(x => x.Id == order.OrderStatusId)?.Name</td>
+                                }
+                            </tr>
                         </table>
                     </div>
                 </td>
@@ -331,6 +336,7 @@
         @if (UserStaticInfo.IsSeller)
         {
             <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteWindow">Delete</button>
+            <button type="button" class="btn btn-outline-warning" @onclick="UpdateOrder">Save</button>
         }
         <button type="button" class="btn btn-outline-secondary" @onclick="HideDescriptionWindow">Close</button>
     </div>
@@ -810,7 +816,9 @@
     private async Task UpdateOrder()
     {
         var result = await Http.PutAsJsonAsync("Order", order);
-        order = await result.Content.ReadFromJsonAsync<Order>();
+        await LoadOrders();
+        await LoadBooks();
+        this.IsShowOrderDescriptionModal = false;
     }
 
     private async Task DeleteOrder()
@@ -828,6 +836,7 @@
         order.OrderBooks = orderBooks;
         order.SellerId = UserStaticInfo.CurrentUser.Id;
         order.BuyerId = buyer.Id;
+        order.OrderStatusId = orderStatuses.First(x => x.Code == "New").Id;
         await Http.PostAsJsonAsync("Order", order);
         orderBooks = new List<OrderBook>();
 

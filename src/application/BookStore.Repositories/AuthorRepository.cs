@@ -61,7 +61,7 @@ namespace BookStore.Repositories
 
         public void DeleteBookAuthorByBookId(int id)
         {
-            Execute("DELETE FROM [dbo].[Author] WHERE BookId = @Id", new { Id = id });
+            Execute("DELETE FROM [dbo].[BookAuthor] WHERE BookId = @Id", new { Id = id });
         }
 
         public void DeleteBookAuthorByAuthorId(int id)

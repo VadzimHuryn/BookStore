@@ -25,5 +25,11 @@ namespace BookStore.Models.ViewModels
         public string Image { get; set; }
         public List<int> AuthorIds { get; set; }
         public List<int> GenreIds { get; set; }
+
+        public Book()
+        {
+            AuthorIds = new List<int>();
+            GenreIds = new List<int>();
+        }
     }
 }
