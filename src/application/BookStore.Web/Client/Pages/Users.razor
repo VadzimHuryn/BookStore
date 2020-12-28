@@ -38,7 +38,7 @@
                     <tbody>
                         @foreach (var user in users.Where(x => SearchUser(x)).Skip(PageItemCount * CurrentPageId - 1).Take(PageItemCount))
                         {
-                        <tr>
+                        <tr @onclick="() => ShowUpdateWindow(user.Id)">
                             <td scope="row">@user.UserId</td>
                             <td scope="row">@user.FirstName</td>
                             <td scope="row">@user.LastName</td>
@@ -127,9 +127,50 @@
 
 </BookStore.Web.Client.Components.ModalWindow>
 
+<BookStore.Web.Client.Components.ModalWindow Show="@IsShowUpdateWindow">
+    <EditForm Model="userUpdate" OnValidSubmit="@Update">
+        <DataAnnotationsValidator />
+        @*<ValidationSummary />*@
+
+        <div class="modal-header form-group without-padding">
+            <h5 class="modal-title">User updating</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddWindow">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div class="form-group">
+            <b>First Name</b>
+            <InputText class="form-control" @bind-Value="userUpdate.FirstName" />
+            <ValidationMessage For="() => userUpdate.FirstName" />
+        </div>
+        <div class="form-group">
+            <b>Last Name</b>
+            <InputText class="form-control" @bind-Value="userUpdate.LastName" />
+            <ValidationMessage For="() => userUpdate.LastName" />
+        </div>
+        <div class="form-group">
+            <b>Email</b>
+            <InputText class="form-control" @bind-Value="userUpdate.Email" />
+            <ValidationMessage For="() => userUpdate.Email" />
+        </div>
+        <div class="form-group">
+            <b>Phone number</b>
+            <InputText class="form-control" @bind-Value="userUpdate.PhoneNumber" />
+            <ValidationMessage For="() => userUpdate.PhoneNumber" />
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-outline-warning">Apply changes</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="HideUpdateWindow">Cancel</button>
+        </div>
+    </EditForm>
+
+</BookStore.Web.Client.Components.ModalWindow>
+
 @code
 {
     private User user = new User();
+    private UserUpdate userUpdate = new UserUpdate();
 
     private List<User> users = new List<User>();
     private List<UserRole> userRoles = new List<UserRole>();
@@ -144,9 +185,23 @@
     private int PageItemCount { get; set; } = 10;
     private string SearchText { get; set; } = string.Empty;
 
+    public bool IsShowUpdateWindow { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         await LoadUsers();
+    }
+
+    private void ShowUpdateWindow(int id)
+    {
+        userUpdate = users.Where(x => x.Id == id).Select(x => new UserUpdate() { UserId = x.UserId, Email = x.Email, FirstName = x.FirstName, LastName = x.LastName, PhoneNumber = x.PhoneNumber }).FirstOrDefault();
+        IsShowUpdateWindow = true;
+    }
+
+    private void HideUpdateWindow()
+    {
+        userUpdate = new UserUpdate();
+        IsShowUpdateWindow = false;
     }
 
     protected void OpenAddWindow()
@@ -180,6 +235,13 @@
         {
             UserWithUserIdExists = users.Any(x => x.UserId.Trim().ToUpperInvariant() == user.UserId.Trim().ToUpperInvariant());
         }
+    }
+
+    private async Task Update()
+    {
+        await Http.PutAsJsonAsync("User", userUpdate);
+        await LoadUsers();
+        HideUpdateWindow();
     }
 
     protected async Task Submit()

@@ -75,6 +75,18 @@ namespace BookStore.Services
             return _userRepository.Add(dto);
         }
 
+        public void Update(UserUpdate user)
+        {
+            var currentUser = _userRepository.GetByUserId(user.UserId);
+
+            currentUser.FirstName = user.FirstName;
+            currentUser.LastName = user.LastName;
+            currentUser.PhoneNumber = user.PhoneNumber;
+            currentUser.Email = user.Email;
+
+            _userRepository.Update(currentUser);
+        }
+
         public User GetUserByUserLogin(UserLogin userLogin)
         {
             var userDto = _userRepository.GetByUserId(userLogin.UserId);

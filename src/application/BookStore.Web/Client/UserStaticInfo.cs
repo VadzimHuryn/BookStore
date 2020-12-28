@@ -8,5 +8,6 @@ namespace BookStore.Web.Client
         public static User CurrentUser { get; set; }
         public static bool IsLogged { get; set; }
         public static bool IsSeller { get; set; }
+        public static bool IsNotAthorized { get; set; } = true;
     }
 }

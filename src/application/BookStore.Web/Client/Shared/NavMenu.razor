@@ -22,11 +22,14 @@
                 <span class="oi oi-book" aria-hidden="true"></span> Books
             </NavLink>
         </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="Orders">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Orders
-            </NavLink>
-        </li>
+        @if (!UserStaticInfo.IsNotAthorized)
+        {
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="Orders">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Orders
+                </NavLink>
+            </li>
+        }
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="Authors">
                 <span class="oi oi-people" aria-hidden="true"></span> Authors
@@ -39,7 +42,7 @@
         </li>
         <li class="nav-item px-3">
             <NavLink class="nav-link" @onclick="LogOut">
-                <span class="oi oi-account-logout" aria-hidden="true"></span> LogOut
+                <span class="oi oi-account-logout" aria-hidden="true"></span> LogIn / LogOut
             </NavLink>
         </li>
     </ul>
@@ -61,6 +64,7 @@
         UserStaticInfo.CurrentUser = new User();
         UserStaticInfo.IsLogged = false;
         UserStaticInfo.IsSeller = false;
+        UserStaticInfo.IsNotAthorized = false;
         NavigationManager.NavigateTo("/");
     }
 }

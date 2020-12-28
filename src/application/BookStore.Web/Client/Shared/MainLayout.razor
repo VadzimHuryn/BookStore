@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject HttpClient Http
 
-@if (UserStaticInfo.IsLogged)
+@if (UserStaticInfo.IsLogged || UserStaticInfo.IsNotAthorized)
 {
     <div class="sidebar">
         <NavMenu />
@@ -11,7 +11,7 @@
 
 <div class="main">
     <div class="content px-4">
-        @if (UserStaticInfo.IsLogged)
+        @if (UserStaticInfo.IsLogged || UserStaticInfo.IsNotAthorized)
         {
             @Body
         }
@@ -33,6 +33,11 @@
                             <tr>
                                 <td colspan="2">
                                     <input style="width:100%" type="submit" class="btn btn-primary" value="Log In" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input style="width:100%" type="button" class="btn btn-outline-secondary" value="Without wuthorization" @onclick="() => LogInWithoutAuthorization()"/>
                                 </td>
                             </tr>
                             @if (IsShowErrorLogin)
@@ -75,11 +80,21 @@
             UserStaticInfo.IsLogged = true;
             UserStaticInfo.CurrentUser = user;
             UserStaticInfo.IsSeller = userRoles.First(x => x.Code == "Seller").Id == user.UserRoleId;
+            UserStaticInfo.IsNotAthorized = false;
         }
         else
         {
             UserStaticInfo.IsLogged = false;
+            UserStaticInfo.IsNotAthorized = false;
             IsShowErrorLogin = true;
         }
+    }
+
+    private void LogInWithoutAuthorization()
+    {
+        UserStaticInfo.CurrentUser = null;
+        UserStaticInfo.IsSeller = false;
+        UserStaticInfo.IsLogged = false;
+        UserStaticInfo.IsNotAthorized = true;
     }
 }

@@ -45,5 +45,11 @@ namespace BookStore.Web.Server.Controllers
             return _userService.GetUserByUserLogin(userLogin);
         }
 
+        [HttpPut]
+        public void Update([FromBody] UserUpdate user)
+        {
+            _userService.Update(user);
+        }
+
     }
 }

@@ -107,6 +107,7 @@
         <div class="form-group">
             <b>Buyer</b>
             <button type="button" class="form-control btn btn-outline-primary" data-dismiss="modal" @onclick="ShowBuyers">@(string.IsNullOrEmpty(buyer.FirstName + buyer.LastName) ? "Choose buyer" : string.Format("{0} {1}", buyer.FirstName, buyer.LastName))</button>
+  
         </div>
         <div class="modal-footer">
             <button type="submit" class="btn btn-outline-primary" data-dismiss="modal">Confirm</button>
@@ -607,6 +608,10 @@
 
     private void HideAddWindow()
     {
+        order = new Order();
+        buyer = new User();
+        seller = new User();
+        orderBooks = new List<OrderBook>();
         this.IsShowAddModal = false;
     }
 
@@ -723,6 +728,10 @@
             if (orderBook.Count != 0)
             {
                 orderBooks.First(x => x.BookId == bookId).Count--;
+                if(orderBooks.First(x => x.BookId == bookId).Count == 0)
+                {
+                    orderBooks.Remove(orderBook);
+                }
             }
             else
             {
@@ -833,6 +842,9 @@
 
     protected async Task AddSubmit()
     {
+        if (!orderBooks.Any() || buyer == null || buyer.Id == 0)
+            return;
+
         order.OrderBooks = orderBooks;
         order.SellerId = UserStaticInfo.CurrentUser.Id;
         order.BuyerId = buyer.Id;
