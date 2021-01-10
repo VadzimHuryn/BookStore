@@ -198,3 +198,61 @@ INSERT INTO [dbo].[User]
            ,GETDATE()
            ,0)
 
+
+CREATE VIEW OrderList
+AS SELECT [o].[Id] AS Id,
+	   [o].[Comment] AS Comment,
+	   (SELECT SUM([Count]) FROM [dbo].[OrderBook] WHERE [OrderId] = [o].[Id]) AS BooksCount,
+	   [o].[SummaryPrice] AS SummaryPrice,
+	   [o].[OrderStatusId] AS OrderStatusId,
+	   CONCAT([ub].[FirstName], [ub].[LastName]) AS BuyerName,
+       CONCAT([us].[FirstName], [us].[LastName]) AS SellerName,
+	   [ub].[Email] AS BuyerEmail,
+	   [ub].[PhoneNumber] AS BuyerPhoneNumber,
+	   [o].[OrderDateTime] AS OrderDateTime,
+       [ub].[Id] AS BuyerId
+FROM [dbo].[Order] [o]
+LEFT JOIN [dbo].[User] [ub] ON [o].[BuyerId] = [ub].[Id]
+LEFT JOIN [dbo].[User] [us] ON [o].[SellerId] = [us].[Id]
+
+
+CREATE VIEW BookList
+AS SELECT [b].[Id],
+	   [b].[Name],
+	   [b].[Description],
+	   [b].[ReleaseDate],
+       [b].[Image],
+	   [g].[Count],
+	   [g].[Price]
+FROM [dbo].[Book] [b]
+JOIN [dbo].[Good] [g] ON [b].[Id] = [g].[BookId]
+WHERE [b].[IsDisabled] = 0
+
+CREATE LOGIN db_Buyer WITH PASSWORD = '12345678'
+CREATE LOGIN db_Seller WITH PASSWORD = '12345678'
+
+CREATE USER Buyer FOR LOGIN db_Buyer
+CREATE USER Seller FOR LOGIN db_Seller
+
+GRANT SELECT ON [dbo].[Author] TO Buyer
+GRANT SELECT ON [dbo].[Book] TO Buyer
+GRANT SELECT ON [dbo].[BookAuthor] TO Buyer
+GRANT SELECT ON [dbo].[BookGenre] TO Buyer
+GRANT SELECT ON [dbo].[Genre] TO Buyer
+GRANT SELECT ON [dbo].[Good] TO Buyer
+GRANT SELECT ON [dbo].[Order] TO Buyer
+GRANT SELECT ON [dbo].[OrderBook] TO Buyer
+GRANT SELECT ON [dbo].[OrderStatus] TO Buyer
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Author] TO Seller
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Book] TO Seller
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[BookAuthor] TO Seller
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[BookGenre] TO Seller
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Genre] TO Seller
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Good] TO Seller
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Order] TO Seller
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[OrderBook] TO Seller
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[OrderStatus] TO Seller
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[User] TO Seller
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[UserRole] TO Seller
+
